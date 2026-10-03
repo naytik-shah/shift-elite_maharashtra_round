@@ -1,0 +1,74 @@
+# Extra drops used only by the test scripts in /scripts. Not loaded on the live server.
+# Point DROPS_CONFIG_PATH at "../config/drops.yaml,../config/drops.test.yaml" to use them.
+drops:
+  - id: test-edge
+    name: Edge Case Drop
+    seats: 5
+    window_opens_at: "2026-01-01T00:00:00+05:30"
+    window_closes_at: "2027-01-01T00:00:00+05:30"
+    draw_at: "2027-01-01T01:00:00+05:30"
+    confirm_window_min: 1
+    ticket_price: 500
+
+  - id: test-race
+    name: Close Race Drop
+    seats: 3
+    window_opens_at: "2026-01-01T00:00:00+05:30"
+    window_closes_at: "2027-01-01T00:00:00+05:30"
+    draw_at: "2027-01-01T01:00:00+05:30"
+    confirm_window_min: 1
+    ticket_price: 500
+
+  - id: test-empty
+    name: Empty Drop
+    seats: 5
+    window_opens_at: "2026-01-01T00:00:00+05:30"
+    window_closes_at: "2027-01-01T00:00:00+05:30"
+    draw_at: "2027-01-01T01:00:00+05:30"
+    confirm_window_min: 1
+    ticket_price: 500
+
+  - id: test-future
+    name: Not Open Yet
+    seats: 5
+    window_opens_at: "2027-06-01T00:00:00+05:30"
+    window_closes_at: "2027-06-02T00:00:00+05:30"
+    draw_at: "2027-06-02T01:00:00+05:30"
+    confirm_window_min: 1
+    ticket_price: 500
+
+  - id: test-past
+    name: Window Already Passed
+    seats: 5
+    window_opens_at: "2026-01-01T00:00:00+05:30"
+    window_closes_at: "2026-02-01T00:00:00+05:30"
+    draw_at: "2026-02-01T01:00:00+05:30"
+    confirm_window_min: 1
+    ticket_price: 500
+
+  - id: test-expire
+    name: Expiry Chain Drop
+    seats: 2
+    window_opens_at: "2026-01-01T00:00:00+05:30"
+    window_closes_at: "2027-01-01T00:00:00+05:30"
+    draw_at: "2027-01-01T01:00:00+05:30"
+    confirm_window_min: 1
+    ticket_price: 500
+
+  - id: test-load
+    name: Load Test Drop
+    seats: 500
+    window_opens_at: "2026-01-01T00:00:00+05:30"
+    window_closes_at: "2027-01-01T00:00:00+05:30"
+    draw_at: "2027-01-01T01:00:00+05:30"
+    confirm_window_min: 10
+    ticket_price: 500
+
+  - id: test-live
+    name: Live Update Drop
+    seats: 2
+    window_opens_at: "2026-01-01T00:00:00+05:30"
+    window_closes_at: "2027-01-01T00:00:00+05:30"
+    draw_at: "2027-01-01T01:00:00+05:30"
+    confirm_window_min: 1
+    ticket_price: 500

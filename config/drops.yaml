@@ -1,0 +1,21 @@
+organisers:
+  - organiser@fairdrop.test
+
+drops:
+  - id: launch-night
+    name: Launch Night
+    seats: 500
+    window_opens_at: "2026-10-04T10:00:00+05:30"
+    window_closes_at: "2026-10-04T18:00:00+05:30"
+    draw_at: "2026-10-04T20:00:00+05:30"
+    confirm_window_min: 10
+    ticket_price: 500
+
+  - id: smoke-test
+    name: Smoke Test Drop
+    seats: 10
+    window_opens_at: "2026-10-04T00:00:00+05:30"
+    window_closes_at: "2026-10-05T00:00:00+05:30"
+    draw_at: "2026-10-05T00:30:00+05:30"
+    confirm_window_min: 1
+    ticket_price: 500

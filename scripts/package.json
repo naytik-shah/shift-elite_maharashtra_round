@@ -1,0 +1,13 @@
+{
+  "name": "fairdrop-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "ioredis": "^6.0.0",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "autocannon": "^8.0.0"
+  }
+}
