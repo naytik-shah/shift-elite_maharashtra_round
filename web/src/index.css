@@ -1,0 +1,250 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  color-scheme: light;
+  /* --bg is the middle of the page gradient, for the few places that need one flat colour */
+  --bg: #fbeee5;
+  --bg-from: #ffe1d0;
+  --bg-to: #f0dfd3;
+  --bg-glow: rgb(207 63 26 / 0.14);
+  --surface: #ffffff;
+  --fill: #f4ebe4;
+  --ink: #1b1a18;
+  --muted: #625d57;
+  --line: #ecd9cc;
+  /* orange is the brand and the one interactive colour, nothing else uses it */
+  --primary: #cf3f1a;
+  --primary-fg: #ffffff;
+  --primary-soft: #fbe9e1;
+  --primary-text: #b5360f;
+  --nav: #1b1a18;
+  --nav-fg: #b9b5ad;
+  --ok: #17713c;
+  --ok-soft: #e4f3ea;
+  --danger: #b42318;
+  --danger-soft: #fdecea;
+  --warn: #9a5b00;
+  --warn-soft: #fff4dc;
+  --card-shadow: 0 1px 2px rgb(96 44 16 / 0.06), 0 14px 28px -18px rgb(96 44 16 / 0.28);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #161110;
+  --bg-from: #2a1810;
+  --bg-to: #0f0e0d;
+  --bg-glow: rgb(207 63 26 / 0.2);
+  --surface: #1f1c1a;
+  --fill: #2b2724;
+  --ink: #f5f3ef;
+  --muted: #a8a39b;
+  --line: #38312c;
+  --primary: #cf3f1a;
+  --primary-fg: #ffffff;
+  --primary-soft: #3a2118;
+  --primary-text: #ff8a5c;
+  --nav: #2b2724;
+  --nav-fg: #a8a39b;
+  --ok: #5fd28f;
+  --ok-soft: #16301f;
+  --danger: #ff8f85;
+  --danger-soft: #3a1c1a;
+  --warn: #f5b94a;
+  --warn-soft: #33280f;
+  --card-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-fill: var(--fill);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-primary: var(--primary);
+  --color-primary-fg: var(--primary-fg);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-text: var(--primary-text);
+  --color-nav: var(--nav);
+  --color-nav-fg: var(--nav-fg);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --radius-card: 1.75rem;
+  --radius-tile: 1.125rem;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --animate-rise: rise 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-fade: fade 0.2s ease-out both;
+  --animate-sheet: sheet 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-pop: pop 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-pulse-dot: pulse-dot 1.8s ease-in-out infinite;
+}
+
+/* The whole type system. Every piece of text in the app uses one of these seven,
+   in rem so the browser and OS text size settings still apply.
+   display  one per page, the page title
+   title    one per card, what the card is about
+   headline row and section titles, buttons
+   body     the one sentence that explains, muted
+   strong   a value or a row label, same size as body but dark
+   caption  supporting detail, always muted
+   figure   the single number a card exists to show */
+@utility type-display {
+  font-size: 1.75rem;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.022em;
+}
+@utility type-title {
+  font-size: 1.3125rem;
+  line-height: 1.22;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+@utility type-headline {
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+@utility type-body {
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  font-weight: 400;
+  color: var(--muted);
+}
+@utility type-strong {
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  font-weight: 600;
+}
+@utility type-caption {
+  font-size: 0.8125rem;
+  line-height: 1.38;
+  font-weight: 400;
+  color: var(--muted);
+}
+@utility type-figure {
+  font-size: 3.25rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* White card that stays visible on the tinted page: hairline edge plus a soft warm shadow. */
+@utility surface {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--card-shadow);
+}
+
+/* Cuts the date tab out of the top left corner of the hero with a mask, so whatever is
+   behind the card shows through. s and t are the size of the cut, r its rounded inner
+   corner, f the small fillets where the cut meets the card edge.
+   The kept area is built from pieces that overlap by a pixel, so no hairline shows
+   between them at any zoom or text size. */
+.hero-cut {
+  --s: 5.25rem;
+  --t: 4.5rem;
+  --r: 1.625rem;
+  --f: 1.125rem;
+  mask-repeat: no-repeat;
+  mask-image:
+    linear-gradient(#000, #000),
+    linear-gradient(#000, #000),
+    radial-gradient(circle at 100% 100%, #000 var(--f), transparent calc(var(--f) + 0.5px)),
+    linear-gradient(#000, #000),
+    linear-gradient(#000, #000),
+    radial-gradient(circle at 100% 100%, #000 var(--f), transparent calc(var(--f) + 0.5px)),
+    radial-gradient(circle at 0 0, transparent var(--r), #000 calc(var(--r) + 0.5px));
+  mask-position:
+    calc(var(--s) + var(--f) - 1px) 0,
+    var(--s) calc(var(--f) - 1px),
+    var(--s) 0,
+    0 calc(var(--t) + var(--f) - 1px),
+    calc(var(--f) - 1px) var(--t),
+    0 var(--t),
+    calc(var(--s) - var(--r)) calc(var(--t) - var(--r));
+  mask-size:
+    calc(100% - var(--s) - var(--f) + 1px) 100%,
+    calc(var(--f) + 1px) calc(100% - var(--f) + 1px),
+    var(--f) var(--f),
+    100% calc(100% - var(--t) - var(--f) + 1px),
+    calc(100% - var(--f) + 1px) calc(var(--f) + 1px),
+    var(--f) var(--f),
+    calc(var(--r) + 1px) calc(var(--r) + 1px);
+}
+
+/* Half circle notches on the ticket tear line, cut from the two halves that meet there. */
+.notch-bottom, .notch-top {
+  --n: 0.75rem;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+.notch-bottom {
+  mask-image:
+    radial-gradient(circle at 0 100%, transparent var(--n), #000 calc(var(--n) + 0.5px)),
+    radial-gradient(circle at 100% 100%, transparent var(--n), #000 calc(var(--n) + 0.5px));
+}
+.notch-top {
+  mask-image:
+    radial-gradient(circle at 0 0, transparent var(--n), #000 calc(var(--n) + 0.5px)),
+    radial-gradient(circle at 100% 0, transparent var(--n), #000 calc(var(--n) + 0.5px));
+}
+
+/* Movement only, never opacity, so content is readable even if an animation is paused. */
+@keyframes rise { from { transform: translateY(8px); } }
+@keyframes fade { from { opacity: 0; } }
+@keyframes sheet { from { transform: translateY(100%); } }
+@keyframes pop { from { transform: translateY(8px) scale(0.97); } }
+@keyframes pulse-dot { 50% { opacity: 0.35; } }
+
+html, body, #root { min-height: 100%; }
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--bg);
+  /* Keeps focused or scrolled-to controls clear of the floating nav on phones. */
+  scroll-padding-bottom: 7rem;
+}
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+/* Fixed layer behind everything, so the gradient does not stretch or repeat on long pages
+   and does not repaint while scrolling. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(60rem 32rem at 100% -8rem, var(--bg-glow), transparent 70%),
+    linear-gradient(170deg, var(--bg-from) 0%, var(--bg) 42%, var(--bg-to) 100%);
+}
+
+button, a, input { touch-action: manipulation; }
+:focus-visible { outline: 2px solid var(--primary-text); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
