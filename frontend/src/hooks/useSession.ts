@@ -1,27 +1,23 @@
-import { useCallback, useState } from 'react'
-import type { Session } from '../api'
+import { useCallback, useEffect, useState } from 'react'
+import { api, type User } from '@/api'
 
-const KEY = 'fd.session'
-
-function read(): Session | null {
-  try {
-    const raw = localStorage.getItem(KEY)
-    return raw ? (JSON.parse(raw) as Session) : null
-  } catch {
-    return null
-  }
-}
-
+// The session itself is an http only cookie. This just asks the server who we are.
 export function useSession() {
-  const [session, setSession] = useState<Session | null>(read)
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  const set = useCallback((s: Session | null) => {
-    try {
-      if (s) localStorage.setItem(KEY, JSON.stringify(s))
-      else localStorage.removeItem(KEY)
-    } catch { /* ignore */ }
-    setSession(s)
+  useEffect(() => {
+    let alive = true
+    api.me()
+      .then((u) => { if (alive) setUser(u) })
+      .catch(() => { /* treated as signed out, the status view shows connection problems */ })
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
   }, [])
 
-  return { session, setSession: set }
+  const signOut = useCallback(async () => {
+    try { await api.logout() } finally { setUser(null) }
+  }, [])
+
+  return { user, setUser, loading, signOut }
 }

@@ -1,13 +1,26 @@
 import { useEffect, useState } from 'react'
 
-export function useCountdown(target?: number) {
-  const [now, setNow] = useState(Date.now())
+const pad = (n: number) => String(n).padStart(2, '0')
+
+// Accepts epoch ms or an ISO string. Only rerenders when the visible second changes.
+export function useCountdown(target?: number | string | null) {
+  const at = target == null ? 0 : typeof target === 'string' ? Date.parse(target) : target
+  const left = () => (at ? Math.max(0, Math.ceil((at - Date.now()) / 1000)) : 0)
+  const [s, setS] = useState(left)
+
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 250)
+    setS(left())
+    if (!at) return
+    const id = setInterval(() => setS(left()), 250)
     return () => clearInterval(id)
-  }, [])
-  const ms = target ? Math.max(0, target - now) : 0
-  const s = Math.ceil(ms / 1000)
-  const label = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
-  return { ms, label }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [at])
+
+  const h = Math.floor(s / 3600)
+  const m = Math.floor((s % 3600) / 60)
+  // Days read better than 71:59:32 when the event is far off.
+  const label = h >= 24
+    ? `${Math.floor(h / 24)}d ${h % 24}h ${m}m`
+    : h > 0 ? `${pad(h)}:${pad(m)}:${pad(s % 60)}` : `${pad(m)}:${pad(s % 60)}`
+  return { seconds: s, done: at > 0 && s === 0, label }
 }
