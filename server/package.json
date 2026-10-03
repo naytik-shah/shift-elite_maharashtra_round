@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node src/index.js",
     "worker": "node src/worker.js",
-    "test": "node --test test/"
+    "test": "node --test test/*.test.js"
   },
   "dependencies": {
     "express": "^5.2.1",
