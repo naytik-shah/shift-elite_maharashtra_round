@@ -1,11 +1,123 @@
 @import "tailwindcss";
 
-:root { color-scheme: dark; }
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  color-scheme: light;
+  --bg: #f3f2ef;
+  --surface: #ffffff;
+  --fill: #efede8;
+  --ink: #1b1a18;
+  --muted: #6a6660;
+  --line: #e5e2dc;
+  /* orange is the brand and the one interactive colour, nothing else uses it */
+  --primary: #cf3f1a;
+  --primary-fg: #ffffff;
+  --primary-soft: #fbe9e1;
+  --primary-text: #b5360f;
+  --nav: #1b1a18;
+  --nav-fg: #b9b5ad;
+  --ok: #17713c;
+  --ok-soft: #e4f3ea;
+  --danger: #b42318;
+  --danger-soft: #fdecea;
+  --warn: #9a5b00;
+  --warn-soft: #fff4dc;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121110;
+  --surface: #1d1c1a;
+  --fill: #292724;
+  --ink: #f5f3ef;
+  --muted: #a8a39b;
+  --line: #34312d;
+  --primary: #cf3f1a;
+  --primary-fg: #ffffff;
+  --primary-soft: #3a2118;
+  --primary-text: #ff8a5c;
+  --nav: #292724;
+  --nav-fg: #a8a39b;
+  --ok: #5fd28f;
+  --ok-soft: #16301f;
+  --danger: #ff8f85;
+  --danger-soft: #3a1c1a;
+  --warn: #f5b94a;
+  --warn-soft: #33280f;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-fill: var(--fill);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-primary: var(--primary);
+  --color-primary-fg: var(--primary-fg);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-text: var(--primary-text);
+  --color-nav: var(--nav);
+  --color-nav-fg: var(--nav-fg);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --radius-card: 1.75rem;
+  --radius-tile: 1.125rem;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* Type scale in rem so the browser and OS text size settings still apply.
+     17 body, 15 secondary, 13 footnote. Nothing goes below 12. */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.38;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.4;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.41;
+  --text-lg: 1.25rem;
+  --text-lg--line-height: 1.25;
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 1.27;
+  --text-2xl: 1.75rem;
+  --text-2xl--line-height: 1.2;
+  --animate-rise: rise 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-fade: fade 0.2s ease-out both;
+  --animate-sheet: sheet 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-pop: pop 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-pulse-dot: pulse-dot 1.8s ease-in-out infinite;
+}
+
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+@keyframes fade { from { opacity: 0; } }
+@keyframes sheet { from { transform: translateY(100%); } }
+@keyframes pop { from { opacity: 0; transform: translateY(8px) scale(0.97); } }
+@keyframes pulse-dot { 50% { opacity: 0.35; } }
+
 html, body, #root { min-height: 100%; }
+html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
-  background: #12104f;
-  color: #f4f4ff;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.41;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+button, a, input { touch-action: manipulation; }
+:focus-visible { outline: 2px solid var(--primary-text); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
