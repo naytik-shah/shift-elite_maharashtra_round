@@ -1,11 +1,12 @@
 # Fair Drop: MVP Plan
 
 **Team:** Naytik Shah (Backend), Jash Madhani (Frontend), Zeal Shah (Bot defence and testing)
-**Deadlines:** MVP at 2h, presentable version at 6h, final presentation at 9h
+**Deadlines:** MVP at H2, full working product at H5 (feature freeze at H4:15)
+**Related:** `docs/PRD.md` (what and why), `docs/TRD.md` (how)
 
 **MVP in one line:** people sign up, enter for free, a fair and checkable draw picks winners, winners pay to confirm, seats nobody confirms go to the next person in line, and we can never sell more seats than we have.
 
-Everything that does not depend on Zeal's scripts or model is in the MVP. Zeal's work plugs in later without changing the core.
+Everything that does not depend on Zeal's scripts or model is in the MVP. Zeal's work plugs in between H2 and H5 without changing the core.
 
 ---
 
@@ -43,16 +44,19 @@ The organiser can:
 - Organiser dashboard (without bot flags for now)
 - Smoke test script and manual checks (Section 9)
 
-**Not in the MVP (depends on Zeal's work)**
+**After the MVP, by H5 (depends on Zeal's work)**
 
-| Feature | When |
+| Feature | Owner |
 |---|---|
-| Bot scoring model and down-weighting | When Zeal's model is ready |
-| Bot flags and fairness charts on the dashboard | When Zeal's model is ready |
-| Bot attack simulator and k6 load test | When Zeal's scripts are ready |
-| Group entry (up to 5) | Later, if time allows |
+| Scoring service and model, Run scoring button | Zeal (service), Naytik (endpoint), Jash (button) |
+| Flagged entries panel with evidence | Jash, on Naytik's flags endpoints |
+| Results upload and fairness charts | Zeal (upload), Naytik (endpoints), Jash (charts) |
+| Bot simulator scenarios S0 to S6 and k6 runs from VM 2 | Zeal |
+| Deploy to Google Cloud with HTTPS | Naytik |
 
-**How Zeal's model plugs in:** after entries close and before the draw, the model writes a `risk` score and a `weight` into each entry. The draw already reads `weight` (1.0 for everyone until then), so nothing else changes.
+**Not in this build:** group entry and the other stretch goals in PRD Section 15.
+
+**How Zeal's model plugs in:** after entries close, the organiser presses Run scoring. The backend calls Zeal's scoring service, which writes a `risk` score and a `weight` into each entry. The draw already reads `weight` (1.0 for everyone until then), and the draw is blocked while scoring is running, so nothing else changes.
 
 ## 3. Who builds what
 
@@ -60,12 +64,12 @@ The organiser can:
 1. Node + Express + Postgres + Redis in Docker Compose.
 2. Tables from Section 4, with the unique rules built in.
 3. Load drops from `config/drops.yaml` on startup (create only, never overwrite).
-4. Login: email code (sent by email, returned as `devCode` in test mode), session in Redis with a cookie.
+4. Login: email code (sent by email, returned as `devCode` only with a valid test key), session in Redis with a cookie.
 5. Enter, status, draw, confirm, close endpoints (Section 5).
 6. Draw logic with manifest and full ranking (Section 6).
 7. Background job every 10 seconds: expire unconfirmed seats, promote the waitlist, mark the drop complete (Section 7).
 8. Live updates over SSE.
-9. Proof-of-work and rate limits, plus the test-mode IP header.
+9. Proof-of-work and rate limits, plus test access (`X-Test-Key`).
 10. Audit log.
 11. Email alerts.
 12. Dashboard and audit endpoints.
@@ -143,10 +147,10 @@ Base path `/api/v1`. Login uses a session cookie. Error format: `{ "error": { "c
 
 Organisers are the emails listed under `organisers` in the config file.
 
-**Test mode** (`TEST_MODE=true`, never on the live link):
-- `/auth/otp/request` returns `devCode`, and emails to `@fairdrop.test` are not sent.
-- The `X-Test-Client-IP` header is treated as the client IP, so the test script's users do not all share one IP and hit rate limits.
-- `POW_DIFFICULTY` can be lowered so the script runs fast.
+**Test access** (only for requests with `X-Test-Key` equal to the server's `TEST_KEY`; the live link works normally for everyone else):
+- `/auth/otp/request` returns `devCode`. Emails to `@fairdrop.test` are never sent.
+- The `X-Test-Client-IP` header is treated as the client IP, so test users do not all share one IP and hit rate limits.
+- Puzzles use `TEST_POW_DIFFICULTY` (for example 8) so scripts run fast.
 
 **Rate limits and puzzles:** use the defaults in PRD Section 9.3 and 9.4. The puzzle is: find a `nonce` such that `SHA-256(prefix + nonce)` starts with `difficulty` zero bits. Record the server-side time from issuing the challenge to receiving the answer as `pow_server_ms`.
 
@@ -196,7 +200,7 @@ Runs in one place at a time (Postgres advisory lock).
 
 ## 8. Audit log
 
-Every important action writes a row: entry, close, draw, confirm, expiry, promotion, complete.
+Every important action writes a row: close, scoring, draw, confirm, expiry, promotion, complete. Individual entries are not audited (the manifest covers them), which keeps the audit lock off the busy entry path.
 
 - `payload` is a JSON string saved as text.
 - `hash` = SHA-256 of `prev_hash + "|" + seq + "|" + type + "|" + payload`, as hex.
@@ -246,17 +250,18 @@ BASE_URL=http://localhost:3000/api/v1 \
 DATABASE_URL=postgres://fairdrop:fairdrop@localhost:5432/fairdrop \
 DROP_ID=smoke-test \
 ORGANISER_EMAIL=organiser@fairdrop.test \
+TEST_KEY=<server TEST_KEY> \
 USERS=100 \
 node mvp-smoke-test.mjs
 ```
 
-The backend must run with `TEST_MODE=true` and a low `POW_DIFFICULTY` (for example 12).
+Add `TEST_KEY=<the server's TEST_KEY>` to the command. The server should have `TEST_POW_DIFFICULTY` set low (for example 8).
 
 It checks:
 1. 100 users log in (solving puzzles) and enter.
 2. A second entry from each user is rejected.
 3. An entry after close is rejected.
-4. Two Run draw clicks at the same moment: exactly one works.
+4. Run scoring (skipped if not built yet): with only honest users, nobody should lose weight. Then two Run draw clicks at the same moment: exactly one works.
 5. The revealed seed matches the hash shown before the draw.
 6. The manifest matches its hash, and re-running the draw gives the same ranking.
 7. Winners = seats, everyone else is waitlisted with positions 1, 2, 3 and so on.
@@ -311,7 +316,7 @@ GROUP BY user_id HAVING COUNT(*) > 1;
 6. Leave a win unconfirmed: watch the seat move to the next person live on the dashboard.
 7. Database checks and the audit chain: never more seats than available, no card used twice, no edits.
 
-## 11. Done when
+## 11. MVP done when
 
 - [ ] Smoke test script passes every check, no SKIPs
 - [ ] Manual checks pass
