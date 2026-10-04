@@ -1,0 +1,117 @@
+# Render blueprint: API, worker, Postgres, Key Value and the static frontend.
+# Create it from the dashboard: New, Blueprint, pick this repo. Fill in the prompted secrets.
+# The frontend sends every /api call to the API service, so the browser sees one origin and
+# the login cookie works everywhere, including iOS Safari.
+
+services:
+  - type: web
+    name: fairdrop-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile.render
+    dockerContext: .
+    plan: starter
+    region: singapore
+    healthCheckPath: /api/v1/health
+    envVars:
+      - fromGroup: fairdrop-shared
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fairdrop-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: fairdrop-redis
+          property: connectionString
+
+  - type: worker
+    name: fairdrop-worker
+    runtime: docker
+    dockerfilePath: ./Dockerfile.render
+    dockerContext: .
+    dockerCommand: node src/worker.js
+    plan: starter
+    region: singapore
+    envVars:
+      - fromGroup: fairdrop-shared
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fairdrop-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: fairdrop-redis
+          property: connectionString
+
+  - type: keyvalue
+    name: fairdrop-redis
+    plan: starter
+    region: singapore
+    maxmemoryPolicy: noeviction
+    ipAllowList: []
+
+  - type: web
+    name: fairdrop-web
+    runtime: static
+    rootDir: web
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API
+        value: http
+    headers:
+      - path: /sw.js
+        name: Cache-Control
+        value: no-cache
+      - path: /index.html
+        name: Cache-Control
+        value: no-cache
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://fairdrop-api.onrender.com/api/*
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+databases:
+  - name: fairdrop-db
+    databaseName: fairdrop
+    plan: basic-256mb
+    region: singapore
+    ipAllowList: []
+
+envVarGroups:
+  - name: fairdrop-shared
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ANCHOR_PEPPER
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: PUBLIC_BASE_URL
+        value: https://fairdrop-web.onrender.com
+      - key: DROPS_CONFIG_PATH
+        value: /app/config/drops.yaml
+      - key: DISPOSABLE_DOMAINS_PATH
+        value: /app/config/disposable-domains.txt
+      - key: POW_DIFFICULTY
+        value: "18"
+      - key: DB_POOL_MAX
+        value: "15"
+      - key: LOG_LEVEL
+        value: info
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "465"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: MAIL_FROM
+        sync: false
