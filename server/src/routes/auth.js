@@ -5,7 +5,7 @@ import config from '../config.js';
 import { pool } from '../db.js';
 import { redis } from '../redis.js';
 import { Errors } from '../lib/errors.js';
-import { hmacSha256 } from '../lib/hash.js';
+import { hmacSha256, safeEqual } from '../lib/hash.js';
 import { normaliseEmail, emailDomain } from '../lib/email.js';
 import { issueChallenge, verifyPow } from '../services/pow.js';
 import { isOrganiserEmail, isDisposableDomain } from '../services/dropsLoader.js';
@@ -74,6 +74,13 @@ async function upsertUser(email, norm, role) {
   return user;
 }
 
+// Demo only (DEMO_BYPASS_CODE). Never for a real organiser: the only organiser it can open is the dummy
+// @fairdrop.test account. Participants are signed in as normal, with the usual rate limit on verify.
+function demoBypass(code, norm) {
+  if (!config.demoBypassCode || !safeEqual(code, config.demoBypassCode)) return false;
+  return !isOrganiserEmail(norm) || emailDomain(norm) === 'fairdrop.test';
+}
+
 router.post('/auth/otp/verify', async (req, res) => {
   await limitOtpVerifyIp(req);
   const body = otpVerifySchema.parse(req.body ?? {});
@@ -81,9 +88,11 @@ router.post('/auth/otp/verify', async (req, res) => {
   if (!norm) throw Errors.otpInvalid();
 
   const codeHash = hmacSha256(config.sessionSecret, `${norm}|${body.code}`);
-  const outcome = await redis.otpCheck(`otp:${norm}`, codeHash, OTP_MAX_ATTEMPTS);
-  if (outcome === 'locked') throw Errors.otpLocked();
-  if (outcome !== 'ok') throw Errors.otpInvalid();
+  if (!demoBypass(body.code, norm)) {
+    const outcome = await redis.otpCheck(`otp:${norm}`, codeHash, OTP_MAX_ATTEMPTS);
+    if (outcome === 'locked') throw Errors.otpLocked();
+    if (outcome !== 'ok') throw Errors.otpInvalid();
+  }
 
   let user;
   try {

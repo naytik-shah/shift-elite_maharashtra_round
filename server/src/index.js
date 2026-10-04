@@ -26,6 +26,7 @@ server.keepAliveTimeout = 65_000;
 server.headersTimeout = 66_000;
 server.requestTimeout = 30_000;
 server.listen(config.port, '0.0.0.0', () => {
+  if (config.demoBypassCode) logger.warn('DEMO_BYPASS_CODE is set: a fixed login code is accepted. Never set it on a public server.');
   logger.info({ port: config.port, ...summary, testAccess: Boolean(config.testKey) }, 'api listening');
 });
 
