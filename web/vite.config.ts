@@ -64,6 +64,12 @@ export default defineConfig({
     },
   },
   server: {
-    proxy: { '/api': 'http://localhost:3000' },
+    // Local testing only: API_PROXY points at the stack, API_TEST_KEY lets the dev server ask for login codes.
+    proxy: {
+      '/api': {
+        target: process.env.API_PROXY ?? 'http://localhost:3000',
+        headers: process.env.API_TEST_KEY ? { 'X-Test-Key': process.env.API_TEST_KEY } : {},
+      },
+    },
   },
 })
