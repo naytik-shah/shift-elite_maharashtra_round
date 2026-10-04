@@ -14,6 +14,19 @@ def weight_for(risk):
     return 1.0
 
 
+def prob_to_risk(proba, cutoffs=None):
+    """Probability to risk 0-100. With cut-offs (honest 99th, 99.7th and 99.9th percentile probability) the
+    map is piecewise linear through 0 -> 0, cut-offs -> 30, 60, 85 and 1 -> 100. Without them it is 100 x p,
+    so model files saved before the cut-offs existed behave as before."""
+    proba = np.asarray(proba, dtype=float)
+    if not cutoffs:
+        return np.clip(np.round(100 * proba), 0, 100)
+    xs = np.concatenate([[0.0], np.asarray(cutoffs, dtype=float), [1.0]])
+    for i in range(1, len(xs)):  # keep the points strictly increasing if two percentiles tie
+        xs[i] = max(xs[i], np.nextafter(xs[i - 1], 1.0))
+    return np.round(np.interp(proba, xs, [0, *config.CUTOFF_RISKS, 100]))
+
+
 def fallback_risk(feat):
     """Fixed rule from PRD 9.2, used when no trained model is available."""
     base = 100 * (
@@ -61,7 +74,7 @@ def score_features(feat, bundle=None, guard=None, with_reasons=True):
 
     if bundle is not None:
         proba = bundle["model"].predict_proba(to_matrix(feat))[:, 1]
-        raw = np.clip(np.round(100 * proba), 0, 100)
+        raw = prob_to_risk(proba, bundle.get("cutoffs"))
     else:
         raw = np.round(fallback_risk(feat))
 

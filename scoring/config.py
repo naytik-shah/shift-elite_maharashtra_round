@@ -4,6 +4,10 @@ from pathlib import Path
 # risk floor -> weight, highest first (PRD 9.2)
 TIERS = [(85, 0.05), (60, 0.20), (30, 0.50), (0, 1.00)]
 
+# risk the three probability cut-offs map to (see scoring.prob_to_risk); train.py stores the cut-offs
+CUTOFF_RISKS = (30, 60, 85)
+CUTOFF_PERCENTILES = (99.0, 99.7, 99.9)
+
 # a family counts as suspicious at or above this score
 FAMILY_THRESHOLD = 0.5
 
