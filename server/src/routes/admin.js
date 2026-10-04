@@ -111,6 +111,61 @@ router.get('/admin/drops/:dropId/slots', async (req, res) => {
   });
 });
 
+const flagsQuery = z.object({
+  minScore: z.coerce.number().int().min(0).max(100).default(0),
+  maxScore: z.coerce.number().int().min(0).max(100).default(100),
+  page: z.coerce.number().int().min(1).max(10_000).default(1),
+});
+const FLAGS_PAGE = 50;
+
+// Entries the scorer gave a risk score, highest risk first. minScore and maxScore bound a tier.
+router.get('/admin/drops/:dropId/flags', async (req, res) => {
+  const q = flagsQuery.parse(req.query);
+  const dropId = dropIdOf(req);
+  const [rows, total] = await Promise.all([
+    pool.query(
+      `SELECT e.id, e.risk, e.weight, rs.cluster_id, rs.cluster_size
+         FROM entries e JOIN risk_signals rs ON rs.entry_id = e.id
+        WHERE e.drop_id = $1 AND e.risk BETWEEN $2 AND $3
+        ORDER BY e.risk DESC, e.id LIMIT $4 OFFSET $5`,
+      [dropId, q.minScore, q.maxScore, FLAGS_PAGE, (q.page - 1) * FLAGS_PAGE],
+    ),
+    pool.query(
+      'SELECT COUNT(*)::int AS n FROM entries e JOIN risk_signals rs ON rs.entry_id = e.id WHERE e.drop_id = $1 AND e.risk BETWEEN $2 AND $3',
+      [dropId, q.minScore, q.maxScore],
+    ),
+  ]);
+  res.set('Cache-Control', 'no-store').json({
+    flags: rows.rows.map((r) => ({
+      entryId: r.id, risk: r.risk, weight: Number(r.weight), clusterId: r.cluster_id, clusterSize: r.cluster_size,
+    })),
+    page: q.page,
+    total: total.rows[0].n,
+  });
+});
+
+// The evidence behind one score: the four signal families, the reasons in plain words and the linked entries.
+router.get('/admin/drops/:dropId/flags/:entryId', async (req, res) => {
+  const entryId = z.string().uuid().safeParse(req.params.entryId);
+  if (!entryId.success) throw Errors.notFound('Entry not found.');
+  const { rows } = await pool.query(
+    `SELECT e.id, e.risk, e.weight, rs.device, rs.ip, rs.timing, rs.email, rs.reasons, rs.linked
+       FROM entries e JOIN risk_signals rs ON rs.entry_id = e.id
+      WHERE e.id = $1 AND e.drop_id = $2`,
+    [entryId.data, dropIdOf(req)],
+  );
+  if (!rows.length) throw Errors.notFound('No score for that entry.');
+  const r = rows[0];
+  res.set('Cache-Control', 'no-store').json({
+    entryId: r.id,
+    risk: r.risk,
+    weight: Number(r.weight),
+    signals: { device: r.device, ip: r.ip, timing: r.timing, email: r.email },
+    reasons: r.reasons ?? [],
+    linkedEntries: r.linked ?? [],
+  });
+});
+
 const auditQuery = z.object({
   dropId: z.string().max(64).optional(),
   before: z.coerce.number().int().positive().optional(),

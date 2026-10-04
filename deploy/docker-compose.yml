@@ -69,7 +69,10 @@ services:
   redis:
     image: redis:7
     restart: unless-stopped
-    command: ["redis-server", "--appendonly", "no", "--save", "", "--maxclients", "100000"]
+    # Sessions live here, so the data is written to disk (about a second behind) and survives a restart.
+    command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec", "--save", "", "--maxclients", "100000"]
+    volumes:
+      - redisdata:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 3s
@@ -78,3 +81,4 @@ services:
 
 volumes:
   pgdata:
+  redisdata:
