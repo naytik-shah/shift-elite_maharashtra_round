@@ -33,6 +33,18 @@ python evaluate.py ../simulator/runs/* --fallback     # fallback rule, no traini
 python train.py ../simulator/runs/*                   # trains, saves model/model.joblib, prints a report
 ```
 
+For the model we ship, build the offline dataset first (`cd ../simulator && ./make-dataset.sh`) and run:
+
+```bash
+python train.py ../simulator/runs/* --kind logreg --train-scenarios S0,S1,S3,S4   # S2 held out, S5 not used
+```
+
+Probability to risk: `train.py` scores the honest entries of the training runs and stores their 99th, 99.7th
+and 99.9th percentile probability in the model file as `cutoffs`. The service maps those three values to risk
+30, 60 and 85 with straight lines between them (0 stays 0, 1 stays 100), so the PRD tiers and weights stay as
+they are. Held-out and mixed runs never choose the cut-offs. A model file without `cutoffs` uses
+risk = 100 x probability.
+
 `train.py` trains on S0, S1, S3, S4 and S5 runs and never trains on the held-out scenario
 (default S2) or on S6 runs, which contain it. Options: `--kind logreg|gbt`,
 `--holdout S2`, `--train-scenarios S0,S1,S3,S4`.

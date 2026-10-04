@@ -39,6 +39,21 @@ The drop's window must be longer than `windowSeconds` plus a few seconds. `test-
 10 minute confirm window, so promotion rounds wait that long. For a quick run use
 `--set reveal.maxRounds=1`, or use a drop with a 1 minute confirm window.
 
+## Offline dataset (no server needed)
+
+Builds training data from the same population as a live run, without calling the API.
+It works out which accounts would get past the puzzle and rate limits, then writes
+`run.json`, `labels.csv` and `entries.csv` per run (same columns as `export_entries.py`).
+
+```bash
+node src/offline.js config/s1-naive-farm.yaml --seeds 1-5 --set botSharePercent=30
+./make-dataset.sh            # every scenario, 10/30/50 percent bots, seeds 1-5
+```
+
+`make-dataset.sh` writes 110 runs (about 268,000 entries) into `runs/` in a few seconds.
+The rate limit and puzzle outcomes are an approximation of the server, so retrain on real
+runs (`export_entries.py`) once the backend is up.
+
 ## Output
 
 - `runs/<runId>/labels.csv`: entryId, isBot, botType (never sent to the server)

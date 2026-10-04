@@ -18,6 +18,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
+import config
 from evaluate import evaluate_runs, load_run
 from features import FEATURE_COLUMNS, build_features, to_matrix
 
@@ -62,10 +63,18 @@ def main():
     model.fit(X, y)
     print(f"trained {a.kind} on {len(train)} runs, {len(y)} entries, {int(y.sum())} bots")
 
+    # Risk cut-offs come from the honest entries of the training runs only: their 99th, 99.7th and 99.9th
+    # percentile probability map to risk 30, 60 and 85. Held-out and mixed runs never choose them.
+    honest_p = model.predict_proba(X[y == 0])[:, 1]
+    cutoffs = [float(c) for c in np.percentile(honest_p, config.CUTOFF_PERCENTILES)]
+    print(f"cut-offs from {len(honest_p)} honest training entries at {list(config.CUTOFF_PERCENTILES)}: {cutoffs}")
+
     bundle = {
         "model": model,
         "features": FEATURE_COLUMNS,
         "kind": a.kind,
+        "cutoffs": cutoffs,
+        "cutoff_percentiles": list(config.CUTOFF_PERCENTILES),
         "trained_on": [r["meta"]["runId"] for r in train],
         "held_out": holdout,
         "trained_at": datetime.now(timezone.utc).isoformat(),
