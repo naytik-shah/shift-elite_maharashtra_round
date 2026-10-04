@@ -8,10 +8,21 @@ export function useSession() {
 
   useEffect(() => {
     let alive = true
-    api.me()
-      .then((u) => { if (alive) setUser(u) })
-      .catch(() => { /* treated as signed out, the status view shows connection problems */ })
-      .finally(() => { if (alive) setLoading(false) })
+    // A 401 means signed out. A busy server (429, 503) or a dropped connection says nothing about
+    // the login, so ask again a few times instead of showing a signed in person the login button.
+    const ask = async () => {
+      for (let attempt = 0; attempt < 4; attempt++) {
+        try {
+          const u = await api.me()
+          if (alive) setUser(u)
+          return
+        } catch {
+          await new Promise((r) => setTimeout(r, 800 * 2 ** attempt))
+          if (!alive) return
+        }
+      }
+    }
+    ask().finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
   }, [])
 

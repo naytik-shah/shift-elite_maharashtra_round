@@ -203,7 +203,7 @@ export const httpApi: FairDropApi = {
     async slots(dropId) {
       return (await request<{ slots: Slot[] }>(`/admin/drops/${dropId}/slots`)).slots ?? []
     },
-    flags: (dropId, minScore, page) => request<FlagPage>(`/admin/drops/${dropId}/flags?minScore=${minScore}&page=${page}`),
+    flags: (dropId, minScore, page, maxScore = 100) => request<FlagPage>(`/admin/drops/${dropId}/flags?minScore=${minScore}&maxScore=${maxScore}&page=${page}`),
     flag: (dropId, entryId) => request<FlagDetail>(`/admin/drops/${dropId}/flags/${entryId}`),
     async audit(dropId) {
       return (await request<{ events: AuditEvent[] }>(`/admin/audit?dropId=${encodeURIComponent(dropId)}`)).events ?? []

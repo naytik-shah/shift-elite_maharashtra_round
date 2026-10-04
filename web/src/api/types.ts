@@ -170,7 +170,7 @@ export interface FairDropApi {
     draw(dropId: string, key: string): Promise<{ seed: string; manifestHash: string }>
     live(dropId: string): Promise<LiveStats>
     slots(dropId: string): Promise<Slot[]>
-    flags(dropId: string, minScore: number, page: number): Promise<FlagPage>
+    flags(dropId: string, minScore: number, page: number, maxScore?: number): Promise<FlagPage>
     flag(dropId: string, entryId: string): Promise<FlagDetail>
     audit(dropId: string): Promise<AuditEvent[]>
     runs(): Promise<RunSummary[]>

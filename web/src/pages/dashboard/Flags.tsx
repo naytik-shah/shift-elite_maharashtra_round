@@ -76,23 +76,12 @@ function Detail({ dropId, entryId, onPick }: { dropId: string; entryId: string; 
   )
 }
 
-const MAX_HOPS = 10
-
-// The endpoint only takes a lower bound and its sort order is not pinned, so pages are
-// read until some rows inside the tier turn up, and the upper bound is applied here.
+// The server bounds the tier on both sides and sorts by risk, so one page is one page of the tier.
 async function loadTier(dropId: string, tier: (typeof tiers)[number], from: number) {
-  const rows: Flag[] = []
-  let page = from
-  let more = false
-  for (let hop = 0; hop < MAX_HOPS; hop++) {
-    const res: FlagPage = await api.admin.flags(dropId, tier.min, page)
-    const got = res.flags ?? []
-    rows.push(...got.filter((f) => f.risk >= tier.min && f.risk <= tier.max))
-    more = got.length > 0 && (page - 1) * got.length + got.length < (res.total ?? 0)
-    page++
-    if (rows.length > 0 || !more) break
-  }
-  return { rows, next: more ? page : null }
+  const res: FlagPage = await api.admin.flags(dropId, tier.min, from, tier.max)
+  const rows = res.flags ?? []
+  const more = rows.length > 0 && (from - 1) * rows.length + rows.length < (res.total ?? 0)
+  return { rows, next: more ? from + 1 : null }
 }
 
 // Entries the scoring step gave a lower weight, with the evidence. Wording stays neutral:
@@ -152,7 +141,7 @@ export default function Flags({ dropId, version }: { dropId: string; version: nu
         {failed === 'missing' ? <Empty>Flags are not available yet. They appear once scoring is switched on.</Empty> : failed ? <Empty>Could not load flags.</Empty> : !sorted ? <Empty>Loading</Empty> : sorted.length === 0 ? (
           <Empty>No entries in this tier. Scores appear after scoring runs.</Empty>
         ) : (
-          <div className="overflow-x-auto border-t border-line">
+          <div className="max-h-[26rem] overflow-auto border-t border-line">
             <table className="w-full text-left">
               <thead>
                 <tr className="type-caption">
