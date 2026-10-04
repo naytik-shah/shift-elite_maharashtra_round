@@ -357,6 +357,15 @@ export const mockApi: FairDropApi = {
     const s = load()
     return s.user ? toEntry(find(s, dropId), s.user.id) : null
   },
+  async decline(dropId) {
+    await sleep(200)
+    const s = load()
+    const d = find(s, dropId)
+    const e = s.user ? d.entries.find((x) => x.userId === s.user!.id) : undefined
+    if (e) e.state = 'EXPIRED'
+    save(s)
+    return { promoted: false }
+  },
   async confirm(dropId, body) {
     await sleep(450)
     const s = load()
@@ -438,6 +447,13 @@ export const mockApi: FairDropApi = {
   },
 
   admin: {
+    demo: {
+      async status() { throw new ApiError('NOT_FOUND', 'Demo tools need the real backend', 404) },
+      async addEvent() { throw new ApiError('NOT_FOUND', 'Demo tools need the real backend', 404) },
+      async reset() { throw new ApiError('NOT_FOUND', 'Demo tools need the real backend', 404) },
+      async startCrowd() { throw new ApiError('NOT_FOUND', 'Demo tools need the real backend', 404) },
+      async crowd() { throw new ApiError('NOT_FOUND', 'Demo tools need the real backend', 404) },
+    },
     async close(dropId) {
       await sleep(300)
       const s = load()

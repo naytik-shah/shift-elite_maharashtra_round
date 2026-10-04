@@ -37,6 +37,8 @@ const config = {
   testPowDifficulty: int('TEST_POW_DIFFICULTY', 8),
   // Demo only. A fixed six digit code that signs in participants and the dummy organiser. Empty switches it off.
   demoBypassCode: /^\d{6}$/.test(env.DEMO_BYPASS_CODE || '') ? env.DEMO_BYPASS_CODE : '',
+  // Demo tools for the organiser: add an event, reset every event, send a simulated crowd. Off unless set.
+  demoTools: bool('DEMO_TOOLS', false),
   powEnabled: bool('POW_ENABLED', true),
   rateLimitsEnabled: bool('RATE_LIMITS_ENABLED', true),
   smtp: {

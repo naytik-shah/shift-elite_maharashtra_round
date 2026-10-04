@@ -103,6 +103,23 @@ export interface FlagDetail {
   linkedEntries: string[]
 }
 
+export interface DemoTemplate { index: number; name: string; category: string; venue: string; city: string; seats: number; price: number }
+export interface DemoStatus { enabled: boolean; templates: DemoTemplate[]; crowd: { attempts: number } }
+export interface CrowdGroup { total: number; lowered: number; high: number }
+export interface CrowdReport {
+  state: 'none' | 'running' | 'done' | 'interrupted' | 'error'
+  wave?: number
+  waves?: number
+  attempts?: number
+  refused?: number
+  entered?: number
+  honest?: number
+  naive?: number
+  stealth?: number
+  scored?: boolean
+  groups?: Record<'honest' | 'naive' | 'stealth' | 'real', CrowdGroup>
+}
+
 export interface RunSummary { runId: string; scenario: string; botSharePercent: number; createdAt: string }
 
 // The results file from PRD 11.3. Everything is optional so a partial upload still renders.
@@ -158,6 +175,8 @@ export interface FairDropApi {
   enter(dropId: string, body: { pow: PowSolution; deviceFingerprint: string }, key: string): Promise<{ entryId: string; state: EntryState }>
   getMyEntry(dropId: string): Promise<Entry | null>
   confirm(dropId: string, body: { testCard: string; payerName: string }, key: string): Promise<Ticket>
+  // The winner gives the seat up, and the next person on the waitlist is offered it right away.
+  decline(dropId: string, key: string): Promise<{ promoted: boolean }>
   getTickets(): Promise<Ticket[]>
 
   getDraw(dropId: string): Promise<DrawInfo>
@@ -176,6 +195,14 @@ export interface FairDropApi {
     flags(dropId: string, minScore: number, page: number, maxScore?: number): Promise<FlagPage>
     flag(dropId: string, entryId: string): Promise<FlagDetail>
     audit(dropId: string): Promise<AuditEvent[]>
+    // Demo tools. status() fails with NOT_FOUND unless the server was started with them on.
+    demo: {
+      status(): Promise<DemoStatus>
+      addEvent(index: number): Promise<Drop>
+      reset(): Promise<{ reset: number }>
+      startCrowd(dropId: string): Promise<CrowdReport>
+      crowd(dropId: string): Promise<CrowdReport>
+    }
     runs(): Promise<RunSummary[]>
     run(runId: string): Promise<RunResult>
   }

@@ -13,6 +13,7 @@ import authRoutes from './routes/auth.js';
 import dropRoutes from './routes/drops.js';
 import entryRoutes from './routes/entries.js';
 import adminRoutes from './routes/admin.js';
+import demoRoutes from './routes/demo.js';
 
 const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
 const isWrite = (req) => req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'OPTIONS';
@@ -60,6 +61,7 @@ export function createApp() {
   api.use(dropRoutes);
   api.use(entryRoutes);
   api.use(adminRoutes);
+  api.use(demoRoutes);
 
   app.use('/api/v1', api);
   app.use(notFoundHandler);

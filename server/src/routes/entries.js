@@ -6,6 +6,7 @@ import { requireAuth } from '../middleware/auth.js';
 import { idempotency } from '../middleware/idempotency.js';
 import { verifyPow, undoPow } from '../services/pow.js';
 import { confirmSeat } from '../services/confirm.js';
+import { declineSeat } from '../services/waitlist.js';
 import { countEntry } from '../services/stats.js';
 import { dropIdOf } from './drops.js';
 
@@ -63,6 +64,12 @@ router.post('/drops/:dropId/entries/me/confirm', requireAuth, idempotency, async
   const body = confirmSchema.parse(req.body ?? {});
   const { ticket } = await confirmSeat({ dropId, userId: req.session.userId, testCard: body.testCard, payerName: body.payerName });
   res.json({ ticket: { ...ticket, seatNo: ticket.slotNo } });
+});
+
+// "Skip": the winner gives the seat up and the next person on the waitlist is offered it right away.
+router.post('/drops/:dropId/entries/me/decline', requireAuth, idempotency, async (req, res) => {
+  const result = await declineSeat({ dropId: dropIdOf(req), userId: req.session.userId });
+  res.json(result);
 });
 
 export default router;

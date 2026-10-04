@@ -62,6 +62,11 @@ function getTransport() {
 }
 
 async function deliver(job) {
+  // Addresses ending in .test can never be delivered (reserved name), they belong to test and demo accounts.
+  if (/\.test$/i.test(String(job.to).split('@').pop() || '')) {
+    logger.info({ to: job.to, subject: job.subject }, 'mail skipped (.test address)');
+    return;
+  }
   const t = getTransport();
   if (!t) {
     // No SMTP configured: outside production just log it so a developer can read the code.

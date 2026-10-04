@@ -1,7 +1,7 @@
 import { protection } from '@/lib/protection'
 import { backoff, sleep } from '@/lib/utils'
 import {
-  ApiError, type AuditEvent, type ConnState, type DrawInfo, type DrawResults, type Drop, type Entry,
+  ApiError, type AuditEvent, type ConnState, type DrawInfo, type DrawResults, type Drop, type CrowdReport, type DemoStatus, type Entry,
   type EntryState, type ErrorCode, type FairDropApi, type FlagDetail, type FlagPage, type LiveEvent,
   type LiveStats, type ManifestEntry, type PowChallenge, type RunResult, type RunSummary, type Slot,
   type Ticket, type User,
@@ -183,6 +183,7 @@ export const httpApi: FairDropApi = {
   async confirm(dropId, body, key) {
     return (await post<{ ticket: Ticket }>(`/drops/${dropId}/entries/me/confirm`, body, key)).ticket
   },
+  decline: (dropId, key) => post<{ promoted: boolean }>(`/drops/${dropId}/entries/me/decline`, {}, key),
   async getTickets() {
     return (await request<{ tickets: Ticket[] }>('/tickets/me')).tickets ?? []
   },
@@ -205,6 +206,13 @@ export const httpApi: FairDropApi = {
     },
     flags: (dropId, minScore, page, maxScore = 100) => request<FlagPage>(`/admin/drops/${dropId}/flags?minScore=${minScore}&maxScore=${maxScore}&page=${page}`),
     flag: (dropId, entryId) => request<FlagDetail>(`/admin/drops/${dropId}/flags/${entryId}`),
+    demo: {
+      status: () => request<DemoStatus>('/admin/demo/status'),
+      async addEvent(index) { return (await post<{ drop: Drop }>('/admin/demo/events', { index })).drop },
+      reset: () => post<{ reset: number }>('/admin/demo/reset', {}),
+      startCrowd: (dropId) => post<CrowdReport>('/admin/demo/crowd', { dropId }),
+      crowd: (dropId) => request<CrowdReport>(`/admin/demo/crowd/${encodeURIComponent(dropId)}`),
+    },
     async audit(dropId) {
       return (await request<{ events: AuditEvent[] }>(`/admin/audit?dropId=${encodeURIComponent(dropId)}`)).events ?? []
     },

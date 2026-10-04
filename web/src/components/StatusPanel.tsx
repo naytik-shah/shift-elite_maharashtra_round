@@ -10,6 +10,7 @@ import { cn, uuid } from '@/lib/utils'
 import { useApp } from '@/state'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
+import { Dialog, DialogContent } from './ui/dialog'
 import { Card } from './ui/card'
 
 // Every state has the same parts at most: a status label, one title or one number,
@@ -95,11 +96,30 @@ function NoEntry({ drop }: { drop: Drop }) {
 }
 
 function Won({ drop, entry }: { drop: Drop; entry: Entry }) {
-  const { openFlow } = useApp()
+  const { openFlow, setEntry } = useApp()
   const cd = useCountdown(entry.confirmBy)
   const total = (drop.confirmWindowMinutes ?? 10) * 60
   const pct = Math.min(100, (cd.seconds / total) * 100)
   const urgent = cd.seconds <= 60
+  const [asking, setAsking] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+
+  // Giving the seat up hands it to the next person on the waitlist at once.
+  const skip = async () => {
+    setBusy(true)
+    setError('')
+    try {
+      await api.decline(drop.id, uuid())
+      setAsking(false)
+      setEntry(drop.id, await api.getMyEntry(drop.id))
+    } catch (err) {
+      setError(errorMessage(err))
+      api.getMyEntry(drop.id).then((x) => setEntry(drop.id, x)).catch(() => {})
+    } finally {
+      setBusy(false)
+    }
+  }
 
   return (
     <Shell>
@@ -112,7 +132,20 @@ function Won({ drop, entry }: { drop: Drop; entry: Entry }) {
       <Button size="lg" className="mt-5 w-full" onClick={() => openFlow('confirm', drop.id)}>
         Confirm seat
       </Button>
-      <p className="type-caption mt-2.5 text-center">If the timer runs out, the seat goes to the waitlist.</p>
+      <Button variant="plain" className="mt-1 w-full" onClick={() => { setError(''); setAsking(true) }}>
+        Skip this seat
+      </Button>
+      <p className="type-caption mt-1.5 text-center">If the timer runs out, the seat goes to the waitlist.</p>
+
+      <Dialog open={asking} onOpenChange={(o) => !busy && setAsking(o)}>
+        <DialogContent title="Give this seat up?" description="The next person on the waitlist is offered it straight away. You cannot get it back.">
+          {error && <p role="alert" className="type-strong mb-3 rounded-lg bg-danger-soft px-4 py-3 text-danger">{error}</p>}
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="gray" size="lg" disabled={busy} onClick={() => setAsking(false)}>Keep my seat</Button>
+            <Button variant="danger" size="lg" busy={busy} onClick={skip}>Skip seat</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Shell>
   )
 }
@@ -160,8 +193,8 @@ export default function StatusPanel({ drop }: { drop: Drop }) {
       return (
         <Shell>
           <Badge tone="warn">Expired</Badge>
-          <div className="mt-3"><Title>Your confirm window ended</Title></div>
-          <Line>The seat moved to the next person in line.</Line>
+          <div className="mt-3"><Title>This seat moved on</Title></div>
+          <Line>Your confirm window ended or you skipped it, and the seat went to the next person in line.</Line>
         </Shell>
       )
     case 'NOT_SELECTED':

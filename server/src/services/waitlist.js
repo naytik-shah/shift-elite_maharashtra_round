@@ -5,6 +5,7 @@ import { invalidateDrop } from './dropsRepo.js';
 import { getMyStatus, invalidateStatus, bumpStatusVersion } from './status.js';
 import { publishDropEvent, publishUserEvent } from './events.js';
 import { enqueueMail, mailTemplates } from './mailer.js';
+import { Errors } from '../lib/errors.js';
 
 // One pass of the background job (MVP.md section 7): expire unconfirmed seats, hand each to the next
 // waitlisted entry, then complete drops that have no pending seats left. A Postgres advisory lock
@@ -67,7 +68,7 @@ async function expireAndPromote(client) {
 
 // Locks the slot first (the same order the confirm statement uses), so a confirm and an expiry on the
 // same seat can never both win and can never deadlock.
-async function processSlot(client, slotId) {
+async function processSlot(client, slotId, reason = 'EXPIRED') {
   return withTx(async (c) => {
     const s = await c.query(
       `SELECT s.id, s.drop_id, s.slot_no, s.entry_id, d.confirm_window_min, d.name
@@ -81,7 +82,7 @@ async function processSlot(client, slotId) {
     const dropId = slot.drop_id;
 
     const exp = await c.query("UPDATE entries SET state = 'EXPIRED' WHERE id = $1 AND state = 'WON' RETURNING user_id", [slot.entry_id]);
-    await appendAudit(c, dropId, 'EXPIRED', { dropId, slotNo: slot.slot_no, entryId: slot.entry_id });
+    await appendAudit(c, dropId, reason, { dropId, slotNo: slot.slot_no, entryId: slot.entry_id });
 
     // Strictly the smallest waiting rank, so waitlist position stays rank minus the cursor.
     const next = await c.query(
@@ -164,4 +165,32 @@ async function completeDrops(client) {
     }
   }
   return completed;
+}
+
+// A winner gives the seat up. It goes to the next person on the waitlist straight away, using the same
+// step the background job takes when a confirm window runs out, so the two can never both act on one seat.
+export async function declineSeat({ dropId, userId }) {
+  const hit = await pool.query(
+    `UPDATE seat_slots s SET confirm_by = now()
+       FROM entries e
+      WHERE s.entry_id = e.id AND e.user_id = $1 AND s.drop_id = $2 AND s.state = 'PENDING' AND s.confirm_by > now()
+      RETURNING s.id`,
+    [userId, dropId],
+  );
+  if (!hit.rowCount) {
+    const { rows } = await pool.query('SELECT state FROM entries WHERE drop_id = $1 AND user_id = $2', [dropId, userId]);
+    const state = rows[0]?.state;
+    if (state === 'CONFIRMED') throw Errors.alreadyConfirmed();
+    if (state === 'EXPIRED') throw Errors.confirmExpired();
+    throw Errors.notAWinner();
+  }
+  const client = await pool.connect();
+  let r = null;
+  try {
+    r = await processSlot(client, hit.rows[0].id, 'DECLINED');
+  } finally {
+    client.release();
+  }
+  if (r) await announce(r);
+  return { promoted: Boolean(r?.promoted) };
 }

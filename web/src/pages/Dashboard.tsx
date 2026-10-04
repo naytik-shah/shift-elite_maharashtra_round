@@ -7,6 +7,7 @@ import { go } from '@/lib/router'
 import { cn } from '@/lib/utils'
 import { useApp } from '@/state'
 import Controls from './dashboard/Controls'
+import DemoTab from './dashboard/DemoTab'
 import Flags from './dashboard/Flags'
 import Overview, { type History } from './dashboard/Overview'
 import ProofOfProtection from './dashboard/ProofOfProtection'
@@ -14,13 +15,13 @@ import ResultsTab from './dashboard/ResultsTab'
 import { usePoll } from './dashboard/shared'
 import { AuditList, SlotTable } from './dashboard/Tables'
 
-const tabs = [
+const baseTabs = [
   { id: 'overview', label: 'Overview' },
   { id: 'security', label: 'Security' },
   { id: 'results', label: 'Results' },
   { id: 'activity', label: 'Activity' },
 ] as const
-type Tab = (typeof tabs)[number]['id']
+type Tab = (typeof baseTabs)[number]['id'] | 'demo'
 
 const POLL_MS = 3000
 const KEEP = 60
@@ -28,7 +29,7 @@ const KEEP = 60
 function savedTab(): Tab {
   try {
     const t = sessionStorage.getItem('fd.dtab')
-    if (tabs.some((x) => x.id === t)) return t as Tab
+    if (t === 'demo' || baseTabs.some((x) => x.id === t)) return t as Tab
   } catch { /* storage can be blocked */ }
   return 'overview'
 }
@@ -48,6 +49,9 @@ export default function Dashboard({ id }: { id?: string }) {
   const isOrganiser = user?.role === 'organiser'
   const enabled = isOrganiser && !!dropId
   const live = usePoll(() => (enabled ? api.admin.live(dropId!) : Promise.reject()), POLL_MS, [dropId, enabled])
+  // The demo tab only appears when the server has the demo tools switched on.
+  const demo = usePoll(() => (enabled ? api.admin.demo.status() : Promise.reject()), 60_000, [enabled])
+  const tabs = demo.data ? [...baseTabs, { id: 'demo' as const, label: 'Demo' }] : baseTabs
   const slots = usePoll(() => (enabled && tab === 'activity' ? api.admin.slots(dropId!) : Promise.reject()), 8000, [dropId, enabled, tab])
   const audit = usePoll(() => (enabled && tab === 'activity' ? api.admin.audit(dropId!) : Promise.reject()), 12000, [dropId, enabled, tab])
 
@@ -140,6 +144,7 @@ export default function Dashboard({ id }: { id?: string }) {
             {tab === 'overview' && <Overview live={live.data} history={history} />}
             {tab === 'security' && <ProofOfProtection dropId={dropId} live={live.data} />}
             {tab === 'results' && <ResultsTab />}
+            {tab === 'demo' && demo.data && <DemoTab drop={drop} status={demo.data} onChanged={() => { changed(); setHistory({ entries: [], refused: [], seconds: POLL_MS / 1000 }) }} />}
             {tab === 'activity' && (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
