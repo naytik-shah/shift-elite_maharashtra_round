@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { api } from '@/api'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { phaseOf } from '@/lib/eventStatus'
 import { go } from '@/lib/router'
 import { cn } from '@/lib/utils'
 import { useApp } from '@/state'
@@ -9,13 +10,15 @@ import Controls from './dashboard/Controls'
 import ControlRoom from './dashboard/ControlRoom'
 import Fairness from './dashboard/Fairness'
 import Flags from './dashboard/Flags'
+import ProofOfProtection from './dashboard/ProofOfProtection'
 import { usePoll } from './dashboard/shared'
 import { AuditList, SlotTable } from './dashboard/Tables'
 
 export default function Dashboard({ id }: { id?: string }) {
   const { user, loading, drops, openFlow, refreshDrops } = useApp()
   // Drops that are taking entries come first, so the live ones are what the organiser sees.
-  const ordered = [...drops].sort((a, b) => Number(b.state === 'OPEN') - Number(a.state === 'OPEN'))
+  const rank = (d: (typeof drops)[number]) => (phaseOf(d) === 'open' ? 0 : phaseOf(d) === 'drawn' ? 1 : 2)
+  const ordered = [...drops].sort((a, b) => rank(a) - rank(b))
   const dropId = id ?? ordered[0]?.id
   // Bumped after every organiser action, so the flag list reloads once scoring has run.
   const [version, setVersion] = useState(0)
@@ -62,6 +65,7 @@ export default function Dashboard({ id }: { id?: string }) {
           {live.failed && !live.data && <p role="alert" className="type-strong rounded-2xl bg-warn-soft px-4 py-3 text-warn">Live counts are not loading. Retrying.</p>}
           <Controls dropId={dropId} live={live.data} onChange={changed} />
           <ControlRoom live={live.data} />
+          <ProofOfProtection dropId={dropId} live={live.data} />
           <div className="grid grid-cols-1 gap-7 lg:grid-cols-2 lg:gap-6">
             <SlotTable slots={slots.data ?? (slots.failed ? [] : null)} />
             <AuditList events={audit.data ?? (audit.failed ? [] : null)} />

@@ -1,4 +1,4 @@
-import { Compass, LayoutDashboard, ListChecks, Moon, ShieldCheck, Sun, Ticket } from 'lucide-react'
+import { Compass, LayoutDashboard, ListChecks, Moon, Settings, ShieldCheck, Sun, Ticket } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { greeting } from '@/lib/format'
 import { href, type Route, type RouteName } from '@/lib/router'
@@ -15,6 +15,7 @@ const base: Item[] = [
   { route: 'status', label: 'Status', icon: ListChecks },
   { route: 'verify', label: 'Verify', icon: ShieldCheck },
   { route: 'tickets', label: 'Tickets', icon: Ticket },
+  { route: 'account', label: 'Settings', icon: Settings },
 ]
 const organiser: Item = { route: 'dashboard', label: 'Admin', icon: LayoutDashboard }
 
@@ -106,7 +107,7 @@ export default function AppShell({ route, children }: { route: Route; children: 
 
       <nav
         aria-label="Main"
-        className="fixed inset-x-0 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-30 mx-auto flex w-fit items-center gap-0.5 rounded-full bg-nav p-1.5 shadow-lg shadow-black/15 lg:hidden"
+        className="fixed inset-x-0 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-30 mx-auto flex w-[calc(100%-1.5rem)] max-w-[28rem] items-center justify-between gap-0.5 rounded-full bg-nav p-1.5 shadow-lg shadow-black/15 lg:hidden"
       >
         {items.map(({ route: r, label, icon: Icon }) => (
           <a
@@ -114,7 +115,7 @@ export default function AppShell({ route, children }: { route: Route; children: 
             href={href(r)}
             aria-current={active === r ? 'page' : undefined}
             className={cn(
-              'relative flex h-14 w-16 flex-col items-center justify-center gap-1 rounded-full text-nav-fg transition-colors duration-200',
+              'relative flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-full text-nav-fg transition-colors duration-200',
               active === r && 'bg-primary text-white',
             )}
           >

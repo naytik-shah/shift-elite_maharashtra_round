@@ -189,11 +189,20 @@ function Compare() {
               {pairs.map((p) => {
                 const t = target[p.scenario]
                 const run = p.after ?? p.before!
+                const botsIn = run.entries?.bot ?? 0
+                const few = botsIn > 0 && botsIn < 30
+                const won = run.winners?.bot ?? 0
+                const paid = run.confirmed?.bot ?? 0
                 return (
                   <div key={p.scenario}>
                     <p className="type-strong">
                       {names[p.scenario] ?? p.scenario}
-                      <span className="type-caption font-normal">, {run.botSharePercent}% bots</span>
+                      <span className="type-caption font-normal">, {run.botSharePercent}% of accounts were bots</span>
+                    </p>
+                    <p className="type-caption">
+                      {formatNumber(botsIn)} bot entries got past the door
+                      {won > 0 ? `, ${formatNumber(won)} won a seat and ${formatNumber(paid)} could pay` : ''}.
+                      {few ? ' Too few got in for the ratio to mean much.' : ''}
                     </p>
                     <div className="mt-1.5 space-y-1.5">
                       {bar(p.before?.botAdvantageRatio ?? (p.after ? 1 : undefined), t, 'No defences', 'bg-danger')}
@@ -203,6 +212,7 @@ function Compare() {
                   </div>
                 )
               })}
+              <p className="type-caption">The stealth farm figure comes from a model that saw one stealth style during training, so read it as a best case. Rate limits and the one card per seat rule do not depend on the model.</p>
             </div>
           )}
       </Card>

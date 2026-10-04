@@ -1,8 +1,8 @@
-import { Check, Loader2, ShieldCheck, TimerReset } from 'lucide-react'
+import { Check, Loader2, ShieldCheck, TimerReset, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ApiError } from '@/api'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { protection, registerHumanCheck, useProtection } from '@/lib/protection'
 import { useRoute } from '@/lib/router'
 import { cn } from '@/lib/utils'
@@ -239,15 +239,26 @@ export default function ProtectionHost() {
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(o) => !o && cancelled()}>
-        <DialogContent
-          title="Quick human check"
-          description="This keeps automated accounts from taking seats."
-          className="inset-x-3 bottom-auto top-1/2 z-[70] -translate-y-1/2 rounded-card pb-0 sm:inset-x-auto"
-        >
-          {open && <HumanCheck onPassed={passed} />}
-        </DialogContent>
-      </Dialog>
+      <DialogPrimitive.Root open={open} onOpenChange={(o) => !o && cancelled()}>
+        <DialogPrimitive.Portal>
+          <DialogPrimitive.Overlay className="fixed inset-0 z-[65] bg-black/55" />
+          <DialogPrimitive.Content
+            aria-describedby={undefined}
+            className="fixed top-1/2 left-1/2 z-[70] max-h-[92dvh] w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-card bg-bg p-5 text-ink shadow-2xl outline-none"
+          >
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <DialogPrimitive.Title className="type-title">Quick human check</DialogPrimitive.Title>
+                <p className="type-body mt-1">This keeps automated accounts from taking seats.</p>
+              </div>
+              <DialogPrimitive.Close aria-label="Close" className="grid size-9 shrink-0 place-items-center rounded-full bg-fill text-muted hover:text-ink">
+                <X className="size-4" />
+              </DialogPrimitive.Close>
+            </div>
+            {open && <HumanCheck onPassed={passed} />}
+          </DialogPrimitive.Content>
+        </DialogPrimitive.Portal>
+      </DialogPrimitive.Root>
 
       {p.rateLimit && wait > 0 && !onDashboard && (
         <div role="alert" className="fixed inset-x-3 top-3 z-[60] mx-auto flex max-w-md items-start gap-3 rounded-2xl bg-warn-soft px-4 py-3 text-warn shadow-lg">

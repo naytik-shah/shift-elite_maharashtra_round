@@ -48,3 +48,8 @@ export async function requireHumanCheck(): Promise<void> {
   if (!asker) return
   await asker()
 }
+
+// Always asks, even right after a pass. Used where the check is shown as a live demonstration.
+export async function forceHumanCheck(): Promise<void> {
+  if (asker) await asker()
+}

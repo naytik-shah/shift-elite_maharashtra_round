@@ -6,6 +6,8 @@ import { Field, Input } from '@/components/ui/input'
 import { withPow } from '@/lib/pow'
 
 const RESEND_SECONDS = 30
+// Demo builds show the fixed demo code, which the server accepts when it is switched on there.
+const DEMO_CODE = import.meta.env.VITE_DEMO_LOGIN === 'true' ? import.meta.env.VITE_DEMO_CODE || '' : ''
 
 // Login is email plus a one time code. The browser solves a small puzzle before the
 // code is requested, which is what makes mass requests expensive.
@@ -106,6 +108,12 @@ export default function Register({ onDone }: { onDone: (u: User) => void }) {
         >
           <span className="type-body">Test mode code, tap to use</span>
           <span className="type-strong font-mono tracking-widest">{devCode}</span>
+        </button>
+      )}
+      {DEMO_CODE && !devCode && (
+        <button type="button" onClick={() => { setCode(DEMO_CODE); verify(DEMO_CODE) }} className="flex h-12 w-full items-center justify-between rounded-2xl bg-fill px-4 text-left">
+          <span className="type-body">Demo code, tap to use</span>
+          <span className="type-strong font-mono tracking-widest">{DEMO_CODE}</span>
         </button>
       )}
       <Field label="Six digit code" error={error || undefined} hint={devCode ? undefined : 'Check your inbox.'}>
