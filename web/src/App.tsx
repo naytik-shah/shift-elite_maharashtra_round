@@ -22,7 +22,7 @@ const titles: Record<RouteName, string> = {
   tickets: 'Tickets', dashboard: 'Dashboard', account: 'Account',
 }
 
-const sheetFallback = <div className="h-48 animate-pulse rounded-2xl bg-fill" />
+const sheetFallback = <div className="h-48 animate-pulse rounded-lg bg-fill" />
 
 export default function App() {
   const route = useRoute()

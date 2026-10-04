@@ -22,7 +22,7 @@ export function SlotTable({ slots }: { slots: Slot[] | null }) {
               key={f}
               onClick={() => setFilter(f)}
               aria-pressed={filter === f}
-              className={cn('h-9 shrink-0 rounded-full px-3.5 text-[0.8125rem] font-semibold', filter === f ? 'bg-ink text-bg' : 'bg-fill text-ink')}
+              className={cn('h-9 shrink-0 rounded-lg px-3.5 text-[0.8125rem] font-semibold', filter === f ? 'bg-ink text-bg' : 'bg-fill text-ink')}
             >
               {f === 'ALL' ? 'All' : f[0] + f.slice(1).toLowerCase()}
             </button>

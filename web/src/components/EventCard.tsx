@@ -1,25 +1,35 @@
-import { ChevronRight } from 'lucide-react'
 import type { Drop, Entry } from '@/api'
 import { statusBadge } from '@/lib/eventStatus'
-import { formatNumber } from '@/lib/format'
+import { formatDay, formatNumber, formatPrice } from '@/lib/format'
 import { href } from '@/lib/router'
-import { Badge } from './ui/badge'
 import Poster from './Poster'
+import { Badge } from './ui/badge'
 
 export default function EventCard({ drop, entry }: { drop: Drop; entry?: Entry | null }) {
   const badge = statusBadge(drop, entry)
+  const day = formatDay(drop.eventAt ?? drop.drawAt)
+  const place = [drop.venue, drop.city].filter(Boolean).join(', ')
   return (
     <a
       href={href('drop', drop.id)}
-      className="surface flex items-center gap-3.5 rounded-card p-2.5 transition-opacity active:opacity-80"
+      className="group block overflow-hidden rounded-card border border-line bg-surface transition-colors hover:border-muted/60 focus-visible:outline-2"
     >
-      <Poster drop={drop} className="size-[5.5rem] shrink-0" />
-      <div className="min-w-0 flex-1">
-        <Badge tone={badge.tone} dot={badge.dot}>{badge.label}</Badge>
-        <h3 className="type-headline mt-1.5 truncate">{drop.name}</h3>
-        <p className="type-caption truncate">{formatNumber(drop.seats)} seats</p>
+      <div className="relative">
+        <Poster drop={drop} className="aspect-[16/10] transition-transform duration-500 group-hover:scale-[1.02]" />
+        <Badge tone={badge.tone} dot={badge.dot} className="absolute top-3 left-3 border border-line bg-surface text-ink">
+          {badge.label}
+        </Badge>
       </div>
-      <ChevronRight className="mr-1.5 size-5 shrink-0 text-muted" aria-hidden />
+      <div className="p-4">
+        <h3 className="type-headline truncate">{drop.name}</h3>
+        <p className="type-caption mt-0.5 truncate">
+          {day.day} {day.month}{place ? `, ${place}` : ''}
+        </p>
+        <p className="type-caption mt-3 flex justify-between tabular-nums">
+          <span>{formatNumber(drop.seats)} seats</span>
+          <span>{drop.ticketPrice != null ? formatPrice(drop.ticketPrice) : 'Free to enter'}</span>
+        </p>
+      </div>
     </a>
   )
 }

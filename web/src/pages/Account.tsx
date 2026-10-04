@@ -12,7 +12,7 @@ import { useApp } from '@/state'
 
 function Segmented<T extends string>({ value, options, onChange, label }: { value: T; options: { value: T; label: React.ReactNode }[]; onChange: (v: T) => void; label: string }) {
   return (
-    <div role="radiogroup" aria-label={label} className="flex rounded-full bg-fill p-1">
+    <div role="radiogroup" aria-label={label} className="flex rounded-lg bg-fill p-1">
       {options.map((o) => (
         <button
           key={o.value}
@@ -20,7 +20,7 @@ function Segmented<T extends string>({ value, options, onChange, label }: { valu
           aria-checked={value === o.value}
           onClick={() => onChange(o.value)}
           className={cn(
-            'type-strong flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full px-2 text-muted transition-colors',
+            'type-strong flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg px-2 text-muted transition-colors',
             value === o.value && 'bg-surface text-ink shadow-sm dark:bg-line',
           )}
         >
@@ -90,12 +90,12 @@ function OrganiserPanel() {
           <Button size="lg" className="mt-4 w-full" onClick={() => go('dashboard')}>Open organiser dashboard</Button>
         ) : DEMO && DEMO_CODE ? (
           <>
-            <dl className="mt-4 space-y-1 rounded-2xl bg-fill px-4 py-3">
+            <dl className="mt-4 space-y-1 rounded-lg bg-fill px-4 py-3">
               <div className="flex justify-between gap-3"><dt className="type-caption">Demo organiser</dt><dd className="type-strong break-all text-right">{DEMO_EMAIL}</dd></div>
               <div className="flex justify-between gap-3"><dt className="type-caption">Demo code</dt><dd className="type-strong font-mono tracking-widest">{DEMO_CODE}</dd></div>
             </dl>
             <Button size="lg" className="mt-3 w-full" busy={busy} onClick={demoLogin}>Sign in as demo organiser</Button>
-            {error && <p role="alert" className="type-strong mt-3 rounded-2xl bg-danger-soft px-4 py-3 text-danger">{error}</p>}
+            {error && <p role="alert" className="type-strong mt-3 rounded-lg bg-danger-soft px-4 py-3 text-danger">{error}</p>}
           </>
         ) : (
           <Button size="lg" variant="gray" className="mt-4 w-full" onClick={() => openFlow('login')}>Log in as organiser</Button>

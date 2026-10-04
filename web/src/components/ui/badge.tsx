@@ -13,7 +13,7 @@ const tones: Record<Tone, string> = {
 // The label always says what the state is, the colour is only a second cue.
 export function Badge({ tone = 'neutral', dot, className, children, ...props }: HTMLAttributes<HTMLSpanElement> & { tone?: Tone; dot?: boolean }) {
   return (
-    <span className={cn('inline-flex h-6 items-center gap-1.5 rounded-full px-2.5 text-[0.75rem] leading-none font-semibold', tones[tone], className)} {...props}>
+    <span className={cn('inline-flex h-6 items-center gap-1.5 rounded-md px-2 text-[0.75rem] leading-none font-semibold', tones[tone], className)} {...props}>
       {dot && <span className="size-1.5 animate-pulse-dot rounded-full bg-current" aria-hidden />}
       {children}
     </span>

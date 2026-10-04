@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 
 // One filled style for the main action on a screen, quieter ones for everything else.
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap select-none transition-[transform,opacity,background-color] duration-150 active:scale-[0.98] active:opacity-85 disabled:pointer-events-none disabled:opacity-45',
+  'inline-flex items-center justify-center gap-2 rounded-lg font-semibold whitespace-nowrap select-none transition-[transform,opacity,background-color] duration-150 active:scale-[0.98] active:opacity-85 disabled:pointer-events-none disabled:opacity-45',
   {
     variants: {
       variant: {
@@ -19,7 +19,7 @@ const buttonVariants = cva(
       size: {
         sm: 'h-9 px-4 text-[0.8125rem]',
         md: 'h-11 px-5 text-[0.9375rem]',
-        lg: 'h-[3.125rem] px-6 text-[1.0625rem]',
+        lg: 'h-12 px-6 text-[1rem]',
       },
     },
     defaultVariants: { variant: 'primary', size: 'md' },

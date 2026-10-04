@@ -36,7 +36,7 @@ export default function Explore() {
     list.length > 0 && (
       <section>
         <SectionTitle>{title}</SectionTitle>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((d) => <EventCard key={d.id} drop={d} entry={entries[d.id]} />)}
         </div>
       </section>
@@ -45,8 +45,8 @@ export default function Explore() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="type-display px-1">Find a drop</h1>
-        <p className="type-body mt-1 px-1">Fair draws for limited seats.</p>
+        <h1 className="type-display">Drops</h1>
+        <p className="type-body mt-1">Limited seats, a fair draw, no queue to win.</p>
       </div>
 
       {drops.length > 3 && (
@@ -59,7 +59,7 @@ export default function Explore() {
             placeholder="Search drops"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="surface h-[3.125rem] w-full rounded-full pr-12 pl-12 text-base text-ink outline-none placeholder:text-muted focus:border-primary focus:ring-3 focus:ring-primary-soft [&::-webkit-search-cancel-button]:hidden"
+            className="h-11 w-full rounded-lg border border-line bg-surface pr-12 pl-11 text-base text-ink outline-none placeholder:text-muted focus:border-primary focus:ring-3 focus:ring-primary-soft [&::-webkit-search-cancel-button]:hidden"
           />
           {query && (
             <button onClick={() => setQuery('')} aria-label="Clear search" className="absolute top-1/2 right-1 grid size-11 -translate-y-1/2 place-items-center text-muted">
@@ -76,8 +76,8 @@ export default function Explore() {
           <Button size="lg" className="mt-5 w-full" onClick={retryDrops}>Try again</Button>
         </Card>
       ) : dropsLoading ? (
-        <div aria-busy className="grid animate-pulse grid-cols-1 gap-3 md:grid-cols-2">
-          {[0, 1, 2, 3].map((i) => <div key={i} className="surface h-[6.75rem] rounded-card" />)}
+        <div aria-busy className="grid animate-pulse grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2].map((i) => <div key={i} className="surface h-64 rounded-card" />)}
         </div>
       ) : filtered.length === 0 ? (
         <Card className="text-center">

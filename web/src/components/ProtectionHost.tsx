@@ -156,7 +156,7 @@ function HumanCheck({ onPassed }: { onPassed: (method: 'drag' | 'keyboard', ms: 
 
   return (
     <div className="space-y-3">
-      <div className="relative mx-auto touch-none select-none overflow-hidden rounded-2xl border border-line" style={{ width: W, height: H, maxWidth: '100%' }}>
+      <div className="relative mx-auto touch-none select-none overflow-hidden rounded-lg border border-line" style={{ width: W, height: H, maxWidth: '100%' }}>
         <canvas ref={bg} width={W} height={H} className="block" aria-hidden />
         <canvas
           ref={piece}
@@ -261,7 +261,7 @@ export default function ProtectionHost() {
       </DialogPrimitive.Root>
 
       {p.rateLimit && wait > 0 && !onDashboard && (
-        <div role="alert" className="fixed inset-x-3 top-3 z-[60] mx-auto flex max-w-md items-start gap-3 rounded-2xl bg-warn-soft px-4 py-3 text-warn shadow-lg">
+        <div role="alert" className="fixed inset-x-3 top-3 z-[60] mx-auto flex max-w-md items-start gap-3 rounded-lg bg-warn-soft px-4 py-3 text-warn shadow-lg">
           <TimerReset className="mt-0.5 size-5 shrink-0" />
           <div>
             <p className="type-strong">You are going too fast</p>
@@ -271,7 +271,7 @@ export default function ProtectionHost() {
       )}
 
       {(p.solving || recent) && (
-        <div role="status" className="fixed inset-x-3 bottom-24 z-[60] mx-auto flex max-w-sm items-center gap-3 rounded-2xl bg-ink px-4 py-3 text-bg shadow-lg sm:bottom-6">
+        <div role="status" className="fixed inset-x-3 bottom-24 z-[60] mx-auto flex max-w-sm items-center gap-3 rounded-lg bg-ink px-4 py-3 text-bg shadow-lg sm:bottom-6">
           {p.solving ? <Loader2 className="size-5 shrink-0 animate-spin" /> : <ShieldCheck className="size-5 shrink-0" />}
           <div className="min-w-0">
             <p className="type-strong text-bg">{p.solving ? 'Checking your device' : 'Device check passed'}</p>

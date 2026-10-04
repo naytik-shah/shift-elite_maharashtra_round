@@ -1,59 +1,56 @@
 @import "tailwindcss";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
+/* Palette: cool neutrals with one signal orange. Flat grounds, hairline edges, no tinted gradients.
+   Orange is the brand and the one interactive colour. Data uses ink and orange so a chart reads
+   in one glance: ink is the crowd, orange is what the defences act on. */
 :root {
   color-scheme: light;
-  /* --bg is the middle of the page gradient, for the few places that need one flat colour */
-  --bg: #fbeee5;
-  --bg-from: #ffe1d0;
-  --bg-to: #f0dfd3;
-  --bg-glow: rgb(207 63 26 / 0.14);
+  --bg: #f2f3f5;
   --surface: #ffffff;
-  --fill: #f4ebe4;
-  --ink: #1b1a18;
-  --muted: #625d57;
-  --line: #ecd9cc;
-  /* orange is the brand and the one interactive colour, nothing else uses it */
-  --primary: #cf3f1a;
+  --fill: #eceef1;
+  --ink: #0f1216;
+  --muted: #5a616b;
+  --line: #dfe2e7;
+  --primary: #d63f0b;
   --primary-fg: #ffffff;
-  --primary-soft: #fbe9e1;
-  --primary-text: #b5360f;
-  --nav: #1b1a18;
-  --nav-fg: #b9b5ad;
-  --ok: #17713c;
-  --ok-soft: #e4f3ea;
+  --primary-soft: #fbe8df;
+  --primary-text: #c23808;
+  --nav: #ffffff;
+  --nav-fg: #5a616b;
+  --ok: #12703f;
+  --ok-soft: #e2f2e9;
   --danger: #b42318;
-  --danger-soft: #fdecea;
-  --warn: #9a5b00;
-  --warn-soft: #fff4dc;
-  --card-shadow: 0 1px 2px rgb(96 44 16 / 0.06), 0 14px 28px -18px rgb(96 44 16 / 0.28);
+  --danger-soft: #fdebe9;
+  --warn: #8f5b00;
+  --warn-soft: #fbf0d6;
+  --card-shadow: 0 1px 0 rgb(15 18 22 / 0.03);
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
-  --bg: #161110;
-  --bg-from: #2a1810;
-  --bg-to: #0f0e0d;
-  --bg-glow: rgb(207 63 26 / 0.2);
-  --surface: #1f1c1a;
-  --fill: #2b2724;
-  --ink: #f5f3ef;
-  --muted: #a8a39b;
-  --line: #38312c;
-  --primary: #cf3f1a;
-  --primary-fg: #ffffff;
-  --primary-soft: #3a2118;
-  --primary-text: #ff8a5c;
-  --nav: #2b2724;
-  --nav-fg: #a8a39b;
-  --ok: #5fd28f;
-  --ok-soft: #16301f;
-  --danger: #ff8f85;
-  --danger-soft: #3a1c1a;
-  --warn: #f5b94a;
-  --warn-soft: #33280f;
-  --card-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+  --bg: #0b0c0e;
+  --surface: #121417;
+  --fill: #1a1d21;
+  --ink: #eceef0;
+  --muted: #8e949d;
+  --line: #262a30;
+  --primary: #ff6a2b;
+  --primary-fg: #0b0c0e;
+  --primary-soft: #2a1a12;
+  --primary-text: #ff7d47;
+  --nav: #121417;
+  --nav-fg: #8e949d;
+  --ok: #46d69a;
+  --ok-soft: #0f2a21;
+  --danger: #ff7b72;
+  --danger-soft: #2e1514;
+  --warn: #e9b949;
+  --warn-soft: #2b2210;
+  --card-shadow: none;
 }
 
 @theme inline {
@@ -75,10 +72,10 @@
   --color-danger-soft: var(--danger-soft);
   --color-warn: var(--warn);
   --color-warn-soft: var(--warn-soft);
-  --radius-card: 1.75rem;
-  --radius-tile: 1.125rem;
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --radius-card: 0.75rem;
+  --radius-tile: 0.5rem;
+  --font-sans: "Geist Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
   --animate-rise: rise 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-fade: fade 0.2s ease-out both;
   --animate-sheet: sheet 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -98,14 +95,14 @@
 @utility type-display {
   font-size: 1.75rem;
   line-height: 1.15;
-  font-weight: 700;
-  letter-spacing: -0.022em;
+  font-weight: 600;
+  letter-spacing: -0.03em;
 }
 @utility type-title {
-  font-size: 1.3125rem;
-  line-height: 1.22;
-  font-weight: 700;
-  letter-spacing: -0.015em;
+  font-size: 1.25rem;
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 @utility type-headline {
   font-size: 1.0625rem;
@@ -131,55 +128,18 @@
   color: var(--muted);
 }
 @utility type-figure {
-  font-size: 3.25rem;
+  font-size: 3rem;
   line-height: 1;
-  font-weight: 700;
-  letter-spacing: -0.035em;
+  font-weight: 600;
+  letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
 }
 
-/* White card that stays visible on the tinted page: hairline edge plus a soft warm shadow. */
+/* A panel is a hairline edge on a flat ground. No shadow doing the work of a border. */
 @utility surface {
   background: var(--surface);
   border: 1px solid var(--line);
   box-shadow: var(--card-shadow);
-}
-
-/* Cuts the date tab out of the top left corner of the hero with a mask, so whatever is
-   behind the card shows through. s and t are the size of the cut, r its rounded inner
-   corner, f the small fillets where the cut meets the card edge.
-   The kept area is built from pieces that overlap by a pixel, so no hairline shows
-   between them at any zoom or text size. */
-.hero-cut {
-  --s: 5.25rem;
-  --t: 4.5rem;
-  --r: 1.625rem;
-  --f: 1.125rem;
-  mask-repeat: no-repeat;
-  mask-image:
-    linear-gradient(#000, #000),
-    linear-gradient(#000, #000),
-    radial-gradient(circle at 100% 100%, #000 var(--f), transparent calc(var(--f) + 0.5px)),
-    linear-gradient(#000, #000),
-    linear-gradient(#000, #000),
-    radial-gradient(circle at 100% 100%, #000 var(--f), transparent calc(var(--f) + 0.5px)),
-    radial-gradient(circle at 0 0, transparent var(--r), #000 calc(var(--r) + 0.5px));
-  mask-position:
-    calc(var(--s) + var(--f) - 1px) 0,
-    var(--s) calc(var(--f) - 1px),
-    var(--s) 0,
-    0 calc(var(--t) + var(--f) - 1px),
-    calc(var(--f) - 1px) var(--t),
-    0 var(--t),
-    calc(var(--s) - var(--r)) calc(var(--t) - var(--r));
-  mask-size:
-    calc(100% - var(--s) - var(--f) + 1px) 100%,
-    calc(var(--f) + 1px) calc(100% - var(--f) + 1px),
-    var(--f) var(--f),
-    100% calc(100% - var(--t) - var(--f) + 1px),
-    calc(100% - var(--f) + 1px) calc(var(--f) + 1px),
-    var(--f) var(--f),
-    calc(var(--r) + 1px) calc(var(--r) + 1px);
 }
 
 /* Half circle notches on the ticket tear line, cut from the two halves that meet there. */
@@ -224,18 +184,6 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
-}
-
-/* Fixed layer behind everything, so the gradient does not stretch or repeat on long pages
-   and does not repaint while scrolling. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(60rem 32rem at 100% -8rem, var(--bg-glow), transparent 70%),
-    linear-gradient(170deg, var(--bg-from) 0%, var(--bg) 42%, var(--bg-to) 100%);
 }
 
 button, a, input { touch-action: manipulation; }

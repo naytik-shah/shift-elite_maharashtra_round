@@ -90,7 +90,7 @@ export default function Register({ onDone }: { onDone: (u: User) => void }) {
             aria-invalid={!!error}
           />
         </Field>
-        <Button size="lg" busy={busy} className="w-full">{busy ? 'Getting ready...' : 'Send code'}</Button>
+        <Button size="lg" busy={busy} className="w-full">{busy ? 'Getting ready…' : 'Send code'}</Button>
       </form>
     )
   }
@@ -104,14 +104,14 @@ export default function Register({ onDone }: { onDone: (u: User) => void }) {
         <button
           type="button"
           onClick={() => { setCode(devCode); verify(devCode) }}
-          className="flex h-12 w-full items-center justify-between rounded-2xl bg-fill px-4 text-left"
+          className="flex h-12 w-full items-center justify-between rounded-lg bg-fill px-4 text-left"
         >
           <span className="type-body">Test mode code, tap to use</span>
           <span className="type-strong font-mono tracking-widest">{devCode}</span>
         </button>
       )}
       {DEMO_CODE && !devCode && (
-        <button type="button" onClick={() => { setCode(DEMO_CODE); verify(DEMO_CODE) }} className="flex h-12 w-full items-center justify-between rounded-2xl bg-fill px-4 text-left">
+        <button type="button" onClick={() => { setCode(DEMO_CODE); verify(DEMO_CODE) }} className="flex h-12 w-full items-center justify-between rounded-lg bg-fill px-4 text-left">
           <span className="type-body">Demo code, tap to use</span>
           <span className="type-strong font-mono tracking-widest">{DEMO_CODE}</span>
         </button>

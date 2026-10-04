@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api } from '@/api'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -7,27 +7,68 @@ import { go } from '@/lib/router'
 import { cn } from '@/lib/utils'
 import { useApp } from '@/state'
 import Controls from './dashboard/Controls'
-import ControlRoom from './dashboard/ControlRoom'
-import Fairness from './dashboard/Fairness'
 import Flags from './dashboard/Flags'
+import Overview, { type History } from './dashboard/Overview'
 import ProofOfProtection from './dashboard/ProofOfProtection'
+import ResultsTab from './dashboard/ResultsTab'
 import { usePoll } from './dashboard/shared'
 import { AuditList, SlotTable } from './dashboard/Tables'
 
+const tabs = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'security', label: 'Security' },
+  { id: 'results', label: 'Results' },
+  { id: 'activity', label: 'Activity' },
+] as const
+type Tab = (typeof tabs)[number]['id']
+
+const POLL_MS = 3000
+const KEEP = 60
+
+function savedTab(): Tab {
+  try {
+    const t = sessionStorage.getItem('fd.dtab')
+    if (tabs.some((x) => x.id === t)) return t as Tab
+  } catch { /* storage can be blocked */ }
+  return 'overview'
+}
+
 export default function Dashboard({ id }: { id?: string }) {
   const { user, loading, drops, openFlow, refreshDrops } = useApp()
-  // Drops that are taking entries come first, so the live ones are what the organiser sees.
+  // Drops taking entries come first, so the live ones are what the organiser sees.
   const rank = (d: (typeof drops)[number]) => (phaseOf(d) === 'open' ? 0 : phaseOf(d) === 'drawn' ? 1 : 2)
   const ordered = [...drops].sort((a, b) => rank(a) - rank(b))
   const dropId = id ?? ordered[0]?.id
+  const drop = drops.find((d) => d.id === dropId)
   // Bumped after every organiser action, so the flag list reloads once scoring has run.
   const [version, setVersion] = useState(0)
+  const [tab, setTab] = useState<Tab>(savedTab)
+  const [history, setHistory] = useState<History>({ entries: [], refused: [], seconds: POLL_MS / 1000 })
 
   const isOrganiser = user?.role === 'organiser'
   const enabled = isOrganiser && !!dropId
-  const live = usePoll(() => (enabled ? api.admin.live(dropId!) : Promise.reject()), 3000, [dropId, enabled])
-  const slots = usePoll(() => (enabled ? api.admin.slots(dropId!) : Promise.reject()), 8000, [dropId, enabled])
-  const audit = usePoll(() => (enabled ? api.admin.audit(dropId!) : Promise.reject()), 12000, [dropId, enabled])
+  const live = usePoll(() => (enabled ? api.admin.live(dropId!) : Promise.reject()), POLL_MS, [dropId, enabled])
+  const slots = usePoll(() => (enabled && tab === 'activity' ? api.admin.slots(dropId!) : Promise.reject()), 8000, [dropId, enabled, tab])
+  const audit = usePoll(() => (enabled && tab === 'activity' ? api.admin.audit(dropId!) : Promise.reject()), 12000, [dropId, enabled, tab])
+
+  // A rolling window of the live numbers, so the traffic chart has a real time series behind it.
+  const seen = useRef<unknown>(null)
+  useEffect(() => { setHistory({ entries: [], refused: [], seconds: POLL_MS / 1000 }); seen.current = null }, [dropId])
+  useEffect(() => {
+    const d = live.data
+    if (!d || seen.current === d) return
+    seen.current = d
+    setHistory((h) => ({
+      ...h,
+      entries: [...h.entries, d.entriesPerMin ?? 0].slice(-KEEP),
+      refused: [...h.refused, d.rateLimitedPerMin ?? 0].slice(-KEEP),
+    }))
+  }, [live.data])
+
+  const pick = (t: Tab) => {
+    setTab(t)
+    try { sessionStorage.setItem('fd.dtab', t) } catch { /* ignore */ }
+  }
 
   if (loading) return <div aria-busy className="surface h-40 animate-pulse rounded-card" />
   if (!isOrganiser) {
@@ -43,35 +84,62 @@ export default function Dashboard({ id }: { id?: string }) {
   const changed = () => { live.refresh(); slots.refresh(); audit.refresh(); refreshDrops(); setVersion((v) => v + 1) }
 
   return (
-    <div className="space-y-7">
-      <div>
-        <h1 className="type-display px-1">Dashboard</h1>
-        <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {ordered.map((d) => (
-            <button
-              key={d.id}
-              onClick={() => go('dashboard', d.id)}
-              aria-pressed={d.id === dropId}
-              className={cn('type-strong h-11 shrink-0 rounded-full px-4', d.id === dropId ? 'border border-ink bg-ink text-bg' : 'surface text-ink')}
-            >
-              {d.name}
-            </button>
-          ))}
+    <div className="space-y-6">
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="type-display truncate">{drop?.name ?? 'Organiser'}</h1>
+          <p className="type-body mt-1">Organiser view{live.data ? `, ${live.data.state.toLowerCase()}` : ''}</p>
         </div>
-      </div>
+        <label className="block">
+          <span className="sr-only">Drop</span>
+          <select
+            value={dropId ?? ''}
+            onChange={(e) => go('dashboard', e.target.value)}
+            className="type-strong h-10 max-w-[16rem] rounded-lg border border-line bg-surface px-3 text-ink outline-none focus:border-primary"
+          >
+            {ordered.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+          </select>
+        </label>
+      </header>
 
       {!dropId ? <Card><p className="type-body">No drops yet.</p></Card> : (
         <>
-          {live.failed && !live.data && <p role="alert" className="type-strong rounded-2xl bg-warn-soft px-4 py-3 text-warn">Live counts are not loading. Retrying.</p>}
+          {live.failed && !live.data && <p role="alert" className="type-strong rounded-lg bg-warn-soft px-4 py-3 text-warn">Live counts are not loading. Retrying…</p>}
           <Controls dropId={dropId} live={live.data} onChange={changed} />
-          <ControlRoom live={live.data} />
-          <ProofOfProtection dropId={dropId} live={live.data} />
-          <div className="grid grid-cols-1 gap-7 lg:grid-cols-2 lg:gap-6">
-            <SlotTable slots={slots.data ?? (slots.failed ? [] : null)} />
-            <AuditList events={audit.data ?? (audit.failed ? [] : null)} />
+
+          <div role="tablist" aria-label="Dashboard sections" className="flex gap-6 border-b border-line">
+            {tabs.map((t) => (
+              <button
+                key={t.id}
+                role="tab"
+                id={`tab-${t.id}`}
+                aria-selected={tab === t.id}
+                aria-controls={`panel-${t.id}`}
+                onClick={() => pick(t.id)}
+                className={cn(
+                  'type-strong -mb-px h-11 border-b-2 border-transparent text-muted transition-colors hover:text-ink',
+                  tab === t.id && 'border-primary text-ink',
+                )}
+              >
+                {t.label}
+              </button>
+            ))}
           </div>
-          <Flags dropId={dropId} version={version} />
-          <Fairness />
+
+          <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
+            {tab === 'overview' && <Overview live={live.data} history={history} />}
+            {tab === 'security' && <ProofOfProtection dropId={dropId} live={live.data} />}
+            {tab === 'results' && <ResultsTab />}
+            {tab === 'activity' && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                  <SlotTable slots={slots.data ?? (slots.failed ? [] : null)} />
+                  <AuditList events={audit.data ?? (audit.failed ? [] : null)} />
+                </div>
+                <Flags dropId={dropId} version={version} />
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>

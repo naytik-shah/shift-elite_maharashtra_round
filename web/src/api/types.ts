@@ -14,6 +14,12 @@ export interface Drop {
   confirmWindowMinutes?: number
   ticketPrice?: number
   seedCommit?: string
+  // Optional details the backend sends when a drop has them.
+  category?: string
+  venue?: string
+  city?: string
+  description?: string
+  eventAt?: string
   // Not in the contract. Shown only if the backend ever sends it.
   posterUrl?: string
 }

@@ -54,7 +54,7 @@ export default function ConfirmSheet({ drop, onDone }: { drop: Drop; onDone: () 
   const expired = !!entry?.confirmBy && cd.done
   return (
     <form onSubmit={submit} className="space-y-4">
-      <div className="flex items-center justify-between rounded-2xl bg-fill px-4 py-3">
+      <div className="flex items-center justify-between rounded-lg bg-fill px-4 py-3">
         <span className="type-body">Time left</span>
         <span className={cn('type-strong tabular-nums', cd.seconds <= 60 && 'text-danger')}>{cd.label}</span>
       </div>
@@ -75,7 +75,7 @@ export default function ConfirmSheet({ drop, onDone }: { drop: Drop; onDone: () 
         <Input required autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} disabled={busy} maxLength={80} />
       </Field>
 
-      {error && <p role="alert" className="type-strong rounded-2xl bg-danger-soft px-4 py-3 text-danger">{error}</p>}
+      {error && <p role="alert" className="type-strong rounded-lg bg-danger-soft px-4 py-3 text-danger">{error}</p>}
 
       <Button size="lg" busy={busy} disabled={expired} className="w-full">
         {busy ? 'Confirming' : drop.ticketPrice != null ? `Pay ${formatPrice(drop.ticketPrice)} and confirm` : 'Confirm seat'}

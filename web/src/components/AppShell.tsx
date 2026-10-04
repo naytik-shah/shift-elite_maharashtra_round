@@ -22,7 +22,7 @@ const organiser: Item = { route: 'dashboard', label: 'Admin', icon: LayoutDashbo
 function Logo() {
   return (
     <a href={href('drops')} className="flex items-center gap-2.5">
-      <img src="/icon.svg" alt="" width={36} height={36} className="size-9 rounded-[0.625rem]" />
+      <img src="/icon.svg" alt="" width={36} height={36} className="size-9 rounded-lg" />
       <span className="type-headline">Fair Drop</span>
     </a>
   )
@@ -34,7 +34,7 @@ function ThemeButton() {
     <button
       onClick={toggle}
       aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-      className="surface grid size-11 place-items-center rounded-full text-ink transition-opacity active:opacity-70"
+      className="surface grid size-11 place-items-center rounded-lg text-ink transition-opacity active:opacity-70"
     >
       {theme === 'dark' ? <Sun className="size-5" /> : <Moon className="size-5" />}
     </button>
@@ -53,7 +53,7 @@ export default function AppShell({ route, children }: { route: Route; children: 
   const name = user?.email.split('@')[0]
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[calc(6.5rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-8 lg:pb-12">
+    <div className="mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-8 lg:pb-12">
       <header className="mb-4 flex items-center justify-between gap-3 lg:mb-8 lg:pt-3">
         <div className="min-w-0 lg:hidden">
           {user ? (
@@ -77,8 +77,8 @@ export default function AppShell({ route, children }: { route: Route; children: 
               href={href(r)}
               aria-current={active === r ? 'page' : undefined}
               className={cn(
-                'type-strong flex h-9 items-center gap-1.5 rounded-full border border-transparent px-4 text-muted transition-colors hover:text-ink',
-                active === r && 'surface text-ink',
+                'type-strong flex h-9 items-center gap-1.5 rounded-lg border border-transparent px-4 text-muted transition-colors hover:text-ink',
+                active === r && 'bg-fill text-ink',
               )}
             >
               {r === 'dashboard' ? 'Dashboard' : r === 'status' ? 'My status' : label}
@@ -107,7 +107,7 @@ export default function AppShell({ route, children }: { route: Route; children: 
 
       <nav
         aria-label="Main"
-        className="fixed inset-x-0 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-30 mx-auto flex w-[calc(100%-1.5rem)] max-w-[28rem] items-center justify-between gap-0.5 rounded-full bg-nav p-1.5 shadow-lg shadow-black/15 lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 flex border-t border-line bg-nav pb-[env(safe-area-inset-bottom)] lg:hidden"
       >
         {items.map(({ route: r, label, icon: Icon }) => (
           <a
@@ -115,13 +115,13 @@ export default function AppShell({ route, children }: { route: Route; children: 
             href={href(r)}
             aria-current={active === r ? 'page' : undefined}
             className={cn(
-              'relative flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-full text-nav-fg transition-colors duration-200',
-              active === r && 'bg-primary text-white',
+              'relative flex h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 text-nav-fg transition-colors duration-200',
+              active === r && 'text-primary-text before:absolute before:inset-x-5 before:top-0 before:h-0.5 before:bg-primary',
             )}
           >
             <Icon className="size-5" strokeWidth={2} aria-hidden />
             <span className="text-[0.6875rem] leading-none font-semibold">{label}</span>
-            {attention[r] && active !== r && <span className="absolute top-2 right-3.5 size-2 rounded-full bg-primary ring-2 ring-nav" aria-hidden />}
+            {attention[r] && active !== r && <span className="absolute top-2.5 right-[32%] size-2 rounded-full bg-primary" aria-hidden />}
           </a>
         ))}
       </nav>

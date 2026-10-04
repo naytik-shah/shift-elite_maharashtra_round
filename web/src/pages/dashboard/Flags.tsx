@@ -33,13 +33,13 @@ function Detail({ dropId, entryId, onPick }: { dropId: string; entryId: string; 
   }, [dropId, entryId])
 
   if (error) return <p role="alert" className="type-body">{error}</p>
-  if (!detail) return <div aria-busy className="h-40 animate-pulse rounded-2xl bg-fill" />
+  if (!detail) return <div aria-busy className="h-40 animate-pulse rounded-lg bg-fill" />
 
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-2 gap-2.5">
-        <div className="rounded-2xl bg-fill px-4 py-3"><p className="type-caption">Risk</p><p className="type-title tabular-nums">{detail.risk}</p></div>
-        <div className="rounded-2xl bg-fill px-4 py-3"><p className="type-caption">Draw weight</p><p className="type-title tabular-nums">{detail.weight}</p></div>
+        <div className="rounded-lg bg-fill px-4 py-3"><p className="type-caption">Risk</p><p className="type-title tabular-nums">{detail.risk}</p></div>
+        <div className="rounded-lg bg-fill px-4 py-3"><p className="type-caption">Draw weight</p><p className="type-title tabular-nums">{detail.weight}</p></div>
       </div>
 
       <div>
@@ -67,7 +67,7 @@ function Detail({ dropId, entryId, onPick }: { dropId: string; entryId: string; 
         {detail.linkedEntries?.length ? (
           <div className="flex flex-wrap gap-1.5">
             {detail.linkedEntries.map((id) => (
-              <button key={id} onClick={() => onPick(id)} className="h-9 rounded-full bg-fill px-3 font-mono text-[0.8125rem]">{shortHash(id, 8, 4)}</button>
+              <button key={id} onClick={() => onPick(id)} className="h-9 rounded-lg bg-fill px-3 font-mono text-[0.8125rem]">{shortHash(id, 8, 4)}</button>
             ))}
           </div>
         ) : <p className="type-body">None.</p>}
@@ -142,7 +142,7 @@ export default function Flags({ dropId, version }: { dropId: string; version: nu
               key={t.name}
               onClick={() => setTier(t)}
               aria-pressed={tier.name === t.name}
-              className={cn('h-9 shrink-0 rounded-full px-3.5 text-[0.8125rem] font-semibold', tier.name === t.name ? 'bg-ink text-bg' : 'bg-fill text-ink')}
+              className={cn('h-9 shrink-0 rounded-lg px-3.5 text-[0.8125rem] font-semibold', tier.name === t.name ? 'bg-ink text-bg' : 'bg-fill text-ink')}
             >
               {t.name} {t.min} to {t.max}
             </button>

@@ -28,9 +28,9 @@ const Figure = ({ children, className }: { children: ReactNode; className?: stri
 function Skeleton() {
   return (
     <Card aria-busy className="animate-pulse">
-      <div className="h-4 w-24 rounded-full bg-fill" />
+      <div className="h-4 w-24 rounded-lg bg-fill" />
       <div className="mt-3 h-12 w-40 rounded-xl bg-fill" />
-      <div className="mt-5 h-[3.125rem] rounded-full bg-fill" />
+      <div className="mt-5 h-[3.125rem] rounded-lg bg-fill" />
     </Card>
   )
 }
@@ -77,10 +77,10 @@ function NoEntry({ drop }: { drop: Drop }) {
           ? `Free to enter, one entry each.${drop.ticketPrice != null ? ` Winners pay ${formatPrice(drop.ticketPrice)}.` : ''}`
           : phase === 'upcoming' ? `Opens in ${cd.label}.` : isDrawn(drop) ? 'The draw is done. Anyone can check it was fair.' : `Draw at ${formatDateTime(drop.drawAt)}.`}
       </Line>
-      {error && <p role="alert" className="type-strong mt-4 rounded-2xl bg-danger-soft px-4 py-3 text-danger">{error}</p>}
+      {error && <p role="alert" className="type-strong mt-4 rounded-lg bg-danger-soft px-4 py-3 text-danger">{error}</p>}
       {open ? (
         <Button size="lg" className="mt-5 w-full" busy={busy} onClick={enter}>
-          {busy ? 'Getting ready...' : user ? 'Enter' : 'Log in to enter'}
+          {busy ? 'Getting ready…' : user ? 'Enter' : 'Log in to enter'}
         </Button>
       ) : phase === 'upcoming' ? (
         <Button size="lg" className="mt-5 w-full" disabled>Opens in {cd.label}</Button>

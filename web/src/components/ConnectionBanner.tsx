@@ -21,7 +21,7 @@ export default function ConnectionBanner() {
 
   if (!show || conn === 'live') return null
   return (
-    <p role="status" className="mb-4 flex animate-rise items-center gap-2.5 type-strong rounded-2xl bg-warn-soft px-4 py-3 text-warn">
+    <p role="status" className="mb-4 flex animate-rise items-center gap-2.5 type-strong rounded-lg bg-warn-soft px-4 py-3 text-warn">
       <WifiOff className="size-4 shrink-0" aria-hidden />
       {copy[conn]}
     </p>
