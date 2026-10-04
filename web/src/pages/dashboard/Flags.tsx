@@ -102,7 +102,7 @@ export default function Flags({ dropId, version }: { dropId: string; version: nu
   const [rows, setRows] = useState<Flag[] | null>(null)
   const [next, setNext] = useState<number | null>(null)
   const [busy, setBusy] = useState(false)
-  const [failed, setFailed] = useState(false)
+  const [failed, setFailed] = useState<false | 'missing' | 'error'>(false)
   const [open, setOpen] = useState<string | null>(null)
 
   useEffect(() => {
@@ -112,7 +112,7 @@ export default function Flags({ dropId, version }: { dropId: string; version: nu
     setFailed(false)
     loadTier(dropId, tier, 1)
       .then((r) => { if (alive) { setRows(r.rows); setNext(r.next) } })
-      .catch(() => alive && setFailed(true))
+      .catch((err) => alive && setFailed(err?.status === 404 ? 'missing' : 'error'))
     return () => { alive = false }
   }, [dropId, tier, version])
 
@@ -124,7 +124,7 @@ export default function Flags({ dropId, version }: { dropId: string; version: nu
       setRows((cur) => [...(cur ?? []), ...r.rows])
       setNext(r.next)
     } catch {
-      setFailed(true)
+      setFailed('error')
     } finally {
       setBusy(false)
     }
@@ -149,7 +149,7 @@ export default function Flags({ dropId, version }: { dropId: string; version: nu
           ))}
         </div>
 
-        {failed ? <Empty>Could not load flags.</Empty> : !sorted ? <Empty>Loading</Empty> : sorted.length === 0 ? (
+        {failed === 'missing' ? <Empty>Flags are not available yet. They appear once scoring is switched on.</Empty> : failed ? <Empty>Could not load flags.</Empty> : !sorted ? <Empty>Loading</Empty> : sorted.length === 0 ? (
           <Empty>No entries in this tier. Scores appear after scoring runs.</Empty>
         ) : (
           <div className="overflow-x-auto border-t border-line">

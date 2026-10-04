@@ -99,12 +99,16 @@ export default function Register({ onDone }: { onDone: (u: User) => void }) {
         <ArrowLeft className="size-4" /> {email}
       </button>
       {devCode && (
-        <p className="flex items-center justify-between rounded-2xl bg-fill px-4 py-3">
-          <span className="type-body">Test mode code</span>
+        <button
+          type="button"
+          onClick={() => { setCode(devCode); verify(devCode) }}
+          className="flex h-12 w-full items-center justify-between rounded-2xl bg-fill px-4 text-left"
+        >
+          <span className="type-body">Test mode code, tap to use</span>
           <span className="type-strong font-mono tracking-widest">{devCode}</span>
-        </p>
+        </button>
       )}
-      <Field label="Six digit code" error={error || undefined} hint="Check your inbox.">
+      <Field label="Six digit code" error={error || undefined} hint={devCode ? undefined : 'Check your inbox.'}>
         <Input
           ref={codeRef}
           required

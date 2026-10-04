@@ -11,7 +11,7 @@ export default function Steps({ drop }: { drop: Drop }) {
     { title: 'Entries open', detail: `Until ${formatDateTime(drop.windowClosesAt)}` },
     { title: 'Entries close', detail: 'The list is frozen' },
     { title: 'Draw', detail: formatDateTime(drop.drawAt) },
-    { title: 'Winners confirm', detail: drop.confirmWindowMinutes ? `${drop.confirmWindowMinutes} minutes each` : '' },
+    { title: 'Winners confirm', detail: drop.confirmWindowMinutes ? `${drop.confirmWindowMinutes} ${drop.confirmWindowMinutes === 1 ? 'minute' : 'minutes'} each` : '' },
   ]
   const current = { upcoming: -1, open: 0, closed: 1, drawn: 3, complete: 4 }[phase]
 

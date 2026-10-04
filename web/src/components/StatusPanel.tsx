@@ -1,7 +1,7 @@
 import { useRef, useState, type ReactNode } from 'react'
 import { api, errorCode, errorMessage, type Drop, type Entry } from '@/api'
 import { useCountdown } from '@/hooks/useCountdown'
-import { phaseOf } from '@/lib/eventStatus'
+import { isDrawn, phaseOf } from '@/lib/eventStatus'
 import { deviceFingerprint } from '@/lib/fingerprint'
 import { formatDateTime, formatPrice } from '@/lib/format'
 import { withPow } from '@/lib/pow'
@@ -75,12 +75,21 @@ function NoEntry({ drop }: { drop: Drop }) {
       <Line>
         {open
           ? `Free to enter, one entry each.${drop.ticketPrice != null ? ` Winners pay ${formatPrice(drop.ticketPrice)}.` : ''}`
-          : phase === 'upcoming' ? `Opens in ${cd.label}.` : `Draw at ${formatDateTime(drop.drawAt)}.`}
+          : phase === 'upcoming' ? `Opens in ${cd.label}.` : isDrawn(drop) ? 'The draw is done. Anyone can check it was fair.' : `Draw at ${formatDateTime(drop.drawAt)}.`}
       </Line>
       {error && <p role="alert" className="type-strong mt-4 rounded-2xl bg-danger-soft px-4 py-3 text-danger">{error}</p>}
-      <Button size="lg" className="mt-5 w-full" busy={busy} disabled={!open} onClick={enter}>
-        {busy ? 'Getting ready...' : !open ? 'Enter' : user ? 'Enter' : 'Log in to enter'}
-      </Button>
+      {open ? (
+        <Button size="lg" className="mt-5 w-full" busy={busy} onClick={enter}>
+          {busy ? 'Getting ready...' : user ? 'Enter' : 'Log in to enter'}
+        </Button>
+      ) : phase === 'upcoming' ? (
+        <Button size="lg" className="mt-5 w-full" disabled>Opens in {cd.label}</Button>
+      ) : (
+        <div className="mt-5 flex flex-col gap-2">
+          {isDrawn(drop) && <Button size="lg" className="w-full" onClick={() => go('verify', drop.id)}>Verify the draw</Button>}
+          {!user && <Button size="lg" variant="gray" className="w-full" onClick={() => openFlow('login', drop.id)}>Log in to see your result</Button>}
+        </div>
+      )}
     </Shell>
   )
 }
