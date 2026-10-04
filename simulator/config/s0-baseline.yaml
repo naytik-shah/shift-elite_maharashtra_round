@@ -1,0 +1,4 @@
+scenario: S0
+dropId: test-load
+honestUsers: 2000
+windowSeconds: 120

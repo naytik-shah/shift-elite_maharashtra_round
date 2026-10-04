@@ -1,0 +1,14 @@
+{
+  "name": "fairdrop-sim",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "run": "node src/cli.js",
+    "dry": "node src/cli.js --dry"
+  },
+  "dependencies": {
+    "pg": "^8.11.0",
+    "yaml": "^2.4.0"
+  }
+}

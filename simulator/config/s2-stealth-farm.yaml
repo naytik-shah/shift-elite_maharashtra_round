@@ -1,0 +1,5 @@
+scenario: S2
+dropId: test-load
+honestUsers: 2000
+botSharePercent: 30
+windowSeconds: 120
