@@ -84,7 +84,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // One status read per drop. The drop list is short, so this stays cheap.
   const refreshEntries = useCallback(async () => {
     if (!userId) { setEntries({}); setTickets([]); return }
-    const ids = dropsRef.current.map((d) => d.id)
+    // A finished drop only needs a read if this person already had an entry in it. Everything else would
+    // be one more request per page load for nothing, and each address has a request limit.
+    const ids = dropsRef.current.filter((d) => d.state !== 'COMPLETE').map((d) => d.id)
     const [list, t] = await Promise.all([
       Promise.all(ids.map((id) => api.getMyEntry(id).catch(() => undefined))),
       api.getTickets().catch(() => undefined),

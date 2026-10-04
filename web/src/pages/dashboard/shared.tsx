@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 export function usePoll<T>(load: () => Promise<T>, ms: number, deps: unknown[]) {
   const [data, setData] = useState<T | null>(null)
   const [failed, setFailed] = useState(false)
+  const [error, setError] = useState<unknown>(null)
   const runRef = useRef<() => void>(() => {})
   const loadRef = useRef(load)
   loadRef.current = load
@@ -12,12 +13,13 @@ export function usePoll<T>(load: () => Promise<T>, ms: number, deps: unknown[]) 
     let alive = true
     setData(null)
     setFailed(false)
+    setError(null)
     const run = async () => {
       try {
         const res = await loadRef.current()
-        if (alive) { setData(res); setFailed(false) }
-      } catch {
-        if (alive) setFailed(true)
+        if (alive) { setData(res); setFailed(false); setError(null) }
+      } catch (err) {
+        if (alive) { setFailed(true); setError(err) }
       }
     }
     runRef.current = run
@@ -27,7 +29,7 @@ export function usePoll<T>(load: () => Promise<T>, ms: number, deps: unknown[]) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps)
 
-  return { data, failed, refresh: () => runRef.current() }
+  return { data, failed, error, refresh: () => runRef.current() }
 }
 
 export function Stat({ label, value, hint }: { label: string; value: string | number; hint?: string }) {

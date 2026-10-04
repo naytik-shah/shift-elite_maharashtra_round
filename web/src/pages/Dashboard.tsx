@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { api } from '@/api'
+import { api, ApiError } from '@/api'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { phaseOf } from '@/lib/eventStatus'
@@ -104,7 +104,17 @@ export default function Dashboard({ id }: { id?: string }) {
 
       {!dropId ? <Card><p className="type-body">No drops yet.</p></Card> : (
         <>
-          {live.failed && !live.data && <p role="alert" className="type-strong rounded-lg bg-warn-soft px-4 py-3 text-warn">Live counts are not loading. Retrying…</p>}
+          {live.failed && !live.data && (
+            live.error instanceof ApiError && (live.error.status === 401 || live.error.status === 403) ? (
+              <p role="alert" className="type-strong rounded-lg bg-warn-soft px-4 py-3 text-warn">
+                This browser is signed in as a different account, so the organiser numbers are locked. Open the organiser view on its own address, 127.0.0.1:5180, or sign in as the organiser again.
+              </p>
+            ) : live.error instanceof ApiError && live.error.status === 429 ? (
+              <p role="alert" className="type-strong rounded-lg bg-warn-soft px-4 py-3 text-warn">Too many requests from this address. The counts resume in a moment.</p>
+            ) : (
+              <p role="alert" className="type-strong rounded-lg bg-warn-soft px-4 py-3 text-warn">Live counts are not loading. Retrying…</p>
+            )
+          )}
           <Controls dropId={dropId} live={live.data} onChange={changed} />
 
           <div role="tablist" aria-label="Dashboard sections" className="flex gap-6 border-b border-line">

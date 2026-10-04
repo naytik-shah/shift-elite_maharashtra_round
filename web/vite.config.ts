@@ -74,9 +74,11 @@ export default defineConfig({
           const key = process.env.API_TEST_KEY
           if (!key) return
           proxy.on('proxyReq', (proxyReq, req) => {
-            const host = String(req.headers.host ?? '').replace(/:\d+$/, '')
+            // A signed in session gets its own address, so two windows are limited separately.
+            const sid = /(?:^|;\s*)sid=([^;]+)/.exec(String(req.headers.cookie ?? ''))?.[1]
+            const who = sid ?? String(req.headers.host ?? '').replace(/:\d+$/, '')
             let h = 0
-            for (const ch of host) h = (h * 31 + ch.charCodeAt(0)) >>> 0
+            for (const ch of who) h = (h * 31 + ch.charCodeAt(0)) >>> 0
             proxyReq.setHeader('X-Test-Key', key)
             proxyReq.setHeader('X-Test-Client-IP', `10.77.${(h >> 8) & 255}.${(h & 255) || 1}`)
           })
