@@ -1,0 +1,10 @@
+# A local inbox for testing email without sending anything to the internet. Mailpit catches every
+# message the app sends, and shows it at http://localhost:8025. Add it like the expose file:
+#   COMPOSE_EXTRA="-f deploy/docker-compose.mailtest.yml" deploy/up.sh
+# and set SMTP_HOST=mailpit, SMTP_PORT=1025 and an empty SMTP_USER and SMTP_PASS in deploy/.env.
+services:
+  mailpit:
+    image: axllent/mailpit
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8025:8025"
