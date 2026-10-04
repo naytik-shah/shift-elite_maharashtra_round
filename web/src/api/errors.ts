@@ -19,6 +19,7 @@ const messages: Record<ErrorCode, string> = {
   IDEMPOTENCY_MISMATCH: 'That request changed while it was being sent. Please try again.',
   SERVICE_BUSY: 'The server is busy. Please try again in a moment.',
   NETWORK: 'No connection. Check your network and try again.',
+  HUMAN_CHECK: 'The human check was not completed.',
   UNKNOWN: 'Something went wrong. Please try again.',
 }
 

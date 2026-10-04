@@ -1,3 +1,4 @@
+import { protection } from '@/lib/protection'
 import { backoff, sleep } from '@/lib/utils'
 import {
   ApiError, type AuditEvent, type ConnState, type DrawInfo, type DrawResults, type Drop, type Entry,
@@ -9,6 +10,8 @@ import {
 const BASE = '/api/v1'
 const MAX_TRIES = 3
 const POLL_MS = 5000
+// Visitors who are not logged in only need the drop state, so they poll less often.
+const GUEST_POLL_MS = 15000
 
 interface Options {
   method?: 'GET' | 'POST'
@@ -48,6 +51,7 @@ async function request<T>(path: string, opts: Options = {}): Promise<T> {
     }
 
     const retryAfter = Number(res.headers.get('Retry-After')) || undefined
+    if (res.status === 429) protection.rateLimited(retryAfter ?? 30)
     // A busy or failing server is retried. A 429 is surfaced so the screen can show the wait.
     if (res.status >= 500 && !last) {
       await sleep(retryAfter ? retryAfter * 1000 : backoff(attempt, 500, 4000))
@@ -93,14 +97,14 @@ function subscribe(dropId: string, authed: boolean, onEvent: (e: LiveEvent) => v
       onEvent({ type: 'drop_state', state: drop.state })
       if (entry) onEvent({ type: 'your_status', ...entry })
     } catch { /* try again on the next tick */ }
-    if (!stopped && polling) pollTimer = setTimeout(poll, POLL_MS)
+    if (!stopped && polling) pollTimer = setTimeout(poll, authed ? POLL_MS : GUEST_POLL_MS)
   }
 
   const startPolling = () => {
     clearTimeout(pollTimer)
     polling = true
     onConn(navigator.onLine ? 'polling' : 'offline')
-    pollTimer = setTimeout(poll, authed ? 0 : POLL_MS)
+    pollTimer = setTimeout(poll, authed ? 0 : GUEST_POLL_MS)
   }
 
   const open = () => {
@@ -137,7 +141,7 @@ function subscribe(dropId: string, authed: boolean, onEvent: (e: LiveEvent) => v
   document.addEventListener('visibilitychange', onVisible)
 
   if (authed) open()
-  else { polling = true; onConn('live'); pollTimer = setTimeout(poll, POLL_MS) }
+  else { polling = true; onConn('live'); pollTimer = setTimeout(poll, GUEST_POLL_MS) }
 
   return () => {
     stopped = true

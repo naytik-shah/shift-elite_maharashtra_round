@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react'
 import AppShell from '@/components/AppShell'
+import ProtectionHost from '@/components/ProtectionHost'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { useRoute, type RouteName } from '@/lib/router'
 import { useApp } from '@/state'
@@ -60,6 +61,8 @@ export default function App() {
           </Suspense>
         </DialogContent>
       </Dialog>
+
+      <ProtectionHost />
     </AppShell>
   )
 }

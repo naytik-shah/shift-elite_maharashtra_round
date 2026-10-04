@@ -65,10 +65,22 @@ export default defineConfig({
   },
   server: {
     // Local testing only: API_PROXY points at the stack, API_TEST_KEY lets the dev server ask for login codes.
+    // Each browser host (localhost, 127.0.0.1, a phone on the wifi) also gets its own test client address,
+    // so the participant window and the organiser window are limited separately, like two real machines.
     proxy: {
       '/api': {
         target: process.env.API_PROXY ?? 'http://localhost:3000',
-        headers: process.env.API_TEST_KEY ? { 'X-Test-Key': process.env.API_TEST_KEY } : {},
+        configure: (proxy) => {
+          const key = process.env.API_TEST_KEY
+          if (!key) return
+          proxy.on('proxyReq', (proxyReq, req) => {
+            const host = String(req.headers.host ?? '').replace(/:\d+$/, '')
+            let h = 0
+            for (const ch of host) h = (h * 31 + ch.charCodeAt(0)) >>> 0
+            proxyReq.setHeader('X-Test-Key', key)
+            proxyReq.setHeader('X-Test-Client-IP', `10.77.${(h >> 8) & 255}.${(h & 255) || 1}`)
+          })
+        },
       },
     },
   },

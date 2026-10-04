@@ -1,6 +1,7 @@
 import { ChevronLeft } from 'lucide-react'
 import DropHero from '@/components/DropHero'
 import FairnessCard from '@/components/FairnessCard'
+import ProtectionsCard from '@/components/ProtectionsCard'
 import StatusPanel from '@/components/StatusPanel'
 import Steps from '@/components/Steps'
 import { Button } from '@/components/ui/button'
@@ -71,6 +72,7 @@ export default function Drop({ id }: { id: string }) {
           </section>
           <Steps drop={drop} />
           <FairnessCard drop={drop} draw={draws[drop.id]} />
+          <ProtectionsCard />
         </div>
       </div>
     </div>

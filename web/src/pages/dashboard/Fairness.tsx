@@ -3,12 +3,12 @@ import { useEffect, useState } from 'react'
 import { api, type RunResult } from '@/api'
 import { Card, SectionTitle } from '@/components/ui/card'
 import { formatNumber, formatPercent } from '@/lib/format'
+import { loadRuns } from '@/lib/runs'
 import { cn } from '@/lib/utils'
 import { Empty } from './shared'
 
 // PRD 11.2 targets. Scenarios without a stated target only report the number.
 const ratioTarget: Record<string, number> = { S1: 0.2, S2: 0.5 }
-const MAX_RUNS = 12
 
 const share = (x?: { honest: number; bot: number }) => (x && x.honest + x.bot > 0 ? x.bot / (x.honest + x.bot) : null)
 
@@ -102,8 +102,7 @@ export default function Fairness() {
     let alive = true
     ;(async () => {
       try {
-        const list = (await api.admin.runs()).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)).slice(0, MAX_RUNS)
-        const files = await Promise.all(list.map((r) => api.admin.run(r.runId).catch(() => null)))
+        const files = await loadRuns()
         if (alive) setRuns(files.filter((f): f is RunResult => !!f).sort((a, b) => a.scenario.localeCompare(b.scenario)))
       } catch {
         if (alive) setFailed(true)

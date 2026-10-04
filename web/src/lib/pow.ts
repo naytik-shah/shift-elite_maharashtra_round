@@ -1,5 +1,6 @@
 import { api, errorCode } from '@/api'
 import type { PowChallenge, PowPurpose, PowSolution } from '@/api/types'
+import { protection, requireHumanCheck } from './protection'
 import type { PowMessage, PowRequest } from './pow.worker'
 
 // Solves the puzzle off the main thread so the page stays responsive.
@@ -22,8 +23,20 @@ export function solvePow(challenge: PowChallenge): Promise<PowSolution> {
 // Fetches a puzzle, solves it and runs the call. A puzzle can expire while it is being
 // solved, so one POW_INVALID gets a fresh puzzle and a second try.
 export async function withPow<T>(purpose: PowPurpose, call: (pow: PowSolution) => Promise<T>): Promise<T> {
+  // Asks for the human check first, then solves the puzzle where the person can see it happen.
+  await requireHumanCheck()
   for (let attempt = 0; ; attempt++) {
-    const pow = await solvePow(await api.getPowChallenge(purpose))
+    const challenge = await api.getPowChallenge(purpose)
+    const t0 = performance.now()
+    protection.powStarted(purpose, challenge.difficulty)
+    let pow
+    try {
+      pow = await solvePow(challenge)
+    } catch (err) {
+      protection.powFailed()
+      throw err
+    }
+    protection.powSolved(purpose, challenge.difficulty, Math.round(performance.now() - t0))
     try {
       return await call(pow)
     } catch (err) {
