@@ -5,6 +5,10 @@ import { appendAudit } from './audit.js';
 import { invalidateStatus, getMyStatus } from './status.js';
 import { publishUserEvent } from './events.js';
 
+// The short reference printed on the ticket. It comes from the keyed card hash, so it shows that one
+// payment method sits behind this ticket without revealing the card or UPI id.
+export const cardRef = (anchorHash) => (anchorHash ? anchorHash.slice(0, 12).toUpperCase() : null);
+
 // Confirming a seat (MVP.md section 6). One conditional UPDATE decides who gets the seat, using the
 // database clock. If the same card is already anchored to another seat, the unique index rejects it.
 export async function confirmSeat({ dropId, userId, testCard, payerName }) {
@@ -30,7 +34,8 @@ export async function confirmSeat({ dropId, userId, testCard, payerName }) {
         [slotId, userId, payerName],
       );
       await appendAudit(c, dropId, 'CONFIRMED', { dropId, slotNo, entryId });
-      return { ticket: { id: t.rows[0].id, dropId, slotNo, holderName: payerName } };
+      const u = await c.query('SELECT email FROM users WHERE id = $1', [userId]);
+      return { ticket: { id: t.rows[0].id, dropId, slotNo, holderName: payerName, holderEmail: u.rows[0]?.email ?? null, cardRef: cardRef(anchorHash) } };
     });
   } catch (err) {
     if (isUniqueViolation(err) && /anchor_hash/.test(err.constraint || '')) throw Errors.anchorUsed();

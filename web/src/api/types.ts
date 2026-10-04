@@ -45,6 +45,9 @@ export interface Ticket {
   dropId: string
   slotNo: number
   holderName: string
+  // The account the ticket was issued to and a short reference of the one payment method behind it.
+  holderEmail?: string | null
+  cardRef?: string | null
 }
 
 export interface DrawInfo {

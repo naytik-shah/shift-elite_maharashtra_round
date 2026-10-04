@@ -379,18 +379,18 @@ export const mockApi: FairDropApi = {
     slot.state = 'CONFIRMED'
     slot.anchor = anchor
     e.state = 'CONFIRMED'
-    const ticket = { id: uuid(), dropId, slotNo: slot.slotNo, holderName: name, userId: user.id }
+    const ticket = { id: uuid(), dropId, slotNo: slot.slotNo, holderName: name, holderEmail: user.email, cardRef: String(anchor).slice(0, 12).toUpperCase(), userId: user.id }
     d.tickets.push(ticket)
     audit(s, d.id, 'CONFIRMED', { slotNo: slot.slotNo, entryId: e.id })
     save(s)
-    return { id: ticket.id, dropId, slotNo: ticket.slotNo, holderName: name }
+    return { id: ticket.id, dropId, slotNo: ticket.slotNo, holderName: name, holderEmail: ticket.holderEmail, cardRef: ticket.cardRef }
   },
   async getTickets() {
     await sleep(60)
     const s = load()
     if (!s.user) return []
     const uid = s.user.id
-    return Object.values(s.drops).flatMap((d) => d.tickets.filter((t) => t.userId === uid).map(({ id, dropId, slotNo, holderName }) => ({ id, dropId, slotNo, holderName })))
+    return Object.values(s.drops).flatMap((d) => d.tickets.filter((t) => t.userId === uid).map(({ id, dropId, slotNo, holderName, holderEmail, cardRef }) => ({ id, dropId, slotNo, holderName, holderEmail, cardRef })))
   },
 
   async getDraw(dropId) {

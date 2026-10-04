@@ -1,4 +1,5 @@
 import express from 'express';
+import { cardRef } from '../services/confirm.js';
 import { pool } from '../db.js';
 import { Errors } from '../lib/errors.js';
 import { requireAuth } from '../middleware/auth.js';
@@ -56,12 +57,12 @@ router.get('/drops/:dropId/draw/results', async (req, res) => {
 
 router.get('/tickets/me', requireAuth, async (req, res) => {
   const { rows } = await pool.query(
-    `SELECT t.id, s.drop_id, s.slot_no, t.payer_name
-     FROM tickets t JOIN seat_slots s ON s.id = t.slot_id
+    `SELECT t.id, s.drop_id, s.slot_no, t.payer_name, u.email, s.anchor_hash
+     FROM tickets t JOIN seat_slots s ON s.id = t.slot_id JOIN users u ON u.id = t.holder_user_id
      WHERE t.holder_user_id = $1 ORDER BY t.issued_at`,
     [req.session.userId],
   );
-  res.json({ tickets: rows.map((r) => ({ id: r.id, dropId: r.drop_id, slotNo: r.slot_no, seatNo: r.slot_no, holderName: r.payer_name })) });
+  res.json({ tickets: rows.map((r) => ({ id: r.id, dropId: r.drop_id, slotNo: r.slot_no, seatNo: r.slot_no, holderName: r.payer_name, holderEmail: r.email, cardRef: cardRef(r.anchor_hash) })) });
 });
 
 // Live updates. The first thing sent is always the user's real current status, so a reconnect
