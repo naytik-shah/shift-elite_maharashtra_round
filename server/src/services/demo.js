@@ -13,7 +13,7 @@ const DAY = 86_400_000;
 export const EVENT_TEMPLATES = [
   { slug: 'sunburn-rooftop', name: 'Sunburn Rooftop Sessions', seats: 300, price: 2500, category: 'Concert', venue: 'Skyline Terrace', city: 'Goa', daysToEvent: 40, description: 'Three DJs on a rooftop above the sea. 300 seats, and everyone who enters has the same chance.' },
   { slug: 'demo-day', name: 'Startup Garage Demo Day', seats: 150, price: 500, category: 'Conference', venue: 'T-Hub Auditorium', city: 'Hyderabad', daysToEvent: 25, description: 'Twenty early teams on one stage, with investors in the room. Limited seats, no queue.' },
-  { slug: 'food-carnival', name: 'Monsoon Food Carnival', seats: 400, price: 350, category: 'Festival', venue: 'Millennium Park', city: 'Kolkata', daysToEvent: 33, description: 'Eighty street food stalls over one weekend. Entry is a fair draw.' },
+  { slug: 'food-carnival', name: 'Monsoon Food Carnival', seats: 2500, price: 350, category: 'Festival', venue: 'Millennium Park', city: 'Kolkata', daysToEvent: 33, description: 'Eighty street food stalls over one weekend. Entry is a fair draw.' },
 ];
 
 export async function createEvent(index) {

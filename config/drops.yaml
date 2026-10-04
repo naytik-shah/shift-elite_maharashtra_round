@@ -1,6 +1,9 @@
 organisers:
   - organiser@fairdrop.test
 
+# The events people see. Seat counts follow the size of the event: a comedy night is a two digit number,
+# a conference or a rooftop party three, a festival four and a stadium concert five. Demand is always far
+# higher than the seats, which is the point of the draw.
 drops:
   - id: launch-night
     name: Launch Night
@@ -11,11 +14,72 @@ drops:
     confirm_window_min: 10
     ticket_price: 500
 
-  - id: smoke-test
-    name: Smoke Test Drop
-    seats: 10
+  - id: eclipse-world-tour
+    name: Eclipse World Tour, Mumbai
+    seats: 12000
+    category: Concert
+    venue: Navi Mumbai Stadium
+    city: Mumbai
+    description: One stadium night on a world tour. 12,000 seats and a crowd many times that size. Everyone who enters has the same chance.
+    event_at: "2026-12-12T19:30:00+05:30"
     window_opens_at: "2026-10-04T00:00:00+05:30"
-    window_closes_at: "2026-10-05T00:00:00+05:30"
-    draw_at: "2026-10-05T00:30:00+05:30"
-    confirm_window_min: 1
-    ticket_price: 500
+    window_closes_at: "2026-10-30T23:00:00+05:30"
+    draw_at: "2026-10-31T12:00:00+05:30"
+    confirm_window_min: 10
+    ticket_price: 3500
+
+  - id: campus-fest
+    name: Campus Fest Finale
+    seats: 2000
+    category: Festival
+    venue: Open Air Theatre
+    city: Pune
+    description: Final night of the inter college fest.
+    event_at: "2026-11-08T17:30:00+05:30"
+    window_opens_at: "2026-10-04T00:00:00+05:30"
+    window_closes_at: "2026-10-30T23:00:00+05:30"
+    draw_at: "2026-10-31T12:00:00+05:30"
+    confirm_window_min: 10
+    ticket_price: 400
+
+  - id: neon-nights
+    name: Neon Nights Live
+    seats: 500
+    category: Concert
+    venue: Jio World Garden
+    city: Mumbai
+    description: One night, 500 seats, 50,000 people. Everyone who enters has the same chance.
+    event_at: "2026-11-21T19:00:00+05:30"
+    window_opens_at: "2026-10-04T00:00:00+05:30"
+    window_closes_at: "2026-10-30T23:00:00+05:30"
+    draw_at: "2026-10-31T12:00:00+05:30"
+    confirm_window_min: 10
+    ticket_price: 1200
+
+  - id: tech-summit
+    name: Builders Summit 2026
+    seats: 120
+    category: Conference
+    venue: Hall 4, Convention Centre
+    city: Bengaluru
+    description: Two days of talks. Limited seats, no first come first served.
+    event_at: "2026-12-05T09:00:00+05:30"
+    window_opens_at: "2026-10-04T00:00:00+05:30"
+    window_closes_at: "2026-10-30T23:00:00+05:30"
+    draw_at: "2026-10-31T12:00:00+05:30"
+    confirm_window_min: 10
+    ticket_price: 800
+
+  - id: comedy-eve
+    name: Comedy Eve with Aanya
+    seats: 50
+    category: Comedy
+    venue: The Studio Theatre
+    city: Ahmedabad
+    description: A small room and a very big waitlist.
+    event_at: "2026-11-14T20:00:00+05:30"
+    window_opens_at: "2026-10-04T00:00:00+05:30"
+    window_closes_at: "2026-10-30T23:00:00+05:30"
+    draw_at: "2026-10-31T12:00:00+05:30"
+    confirm_window_min: 10
+    ticket_price: 600

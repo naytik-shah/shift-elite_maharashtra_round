@@ -1,6 +1,15 @@
 # Extra drops used only by the test scripts in /scripts. Not loaded on the live server.
 # Point DROPS_CONFIG_PATH at "../config/drops.yaml,../config/drops.test.yaml" to use them.
 drops:
+  - id: smoke-test
+    name: Smoke Test Drop
+    seats: 10
+    window_opens_at: "2026-01-01T00:00:00+05:30"
+    window_closes_at: "2027-01-01T00:00:00+05:30"
+    draw_at: "2027-01-01T01:00:00+05:30"
+    confirm_window_min: 1
+    ticket_price: 500
+
   - id: test-edge
     name: Edge Case Drop
     seats: 5
@@ -67,6 +76,24 @@ drops:
   - id: test-live
     name: Live Update Drop
     seats: 2
+    window_opens_at: "2026-01-01T00:00:00+05:30"
+    window_closes_at: "2027-01-01T00:00:00+05:30"
+    draw_at: "2027-01-01T01:00:00+05:30"
+    confirm_window_min: 1
+    ticket_price: 500
+
+  - id: test-group
+    name: Group Test Drop
+    seats: 6
+    window_opens_at: "2026-01-01T00:00:00+05:30"
+    window_closes_at: "2027-01-01T00:00:00+05:30"
+    draw_at: "2027-01-01T01:00:00+05:30"
+    confirm_window_min: 1
+    ticket_price: 500
+
+  - id: test-group-fit
+    name: Group Fit Drop
+    seats: 5
     window_opens_at: "2026-01-01T00:00:00+05:30"
     window_closes_at: "2027-01-01T00:00:00+05:30"
     draw_at: "2027-01-01T01:00:00+05:30"
